@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Shakti Alert - Live Location</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Premium Safety Red Theme */
+            --primary-red: #C84848;
+            --primary-red-dark: #B23838;
+            --bg-warm: #FAF9F7;
+            --bg-white: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-medium: #6B7280;
+            --text-light: #9CA3AF;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --battery-orange: #F59E0B;
+            --battery-green: #10B981;
+            --battery-red: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-warm);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           LAYER 1: FULL-SCREEN MAP
+           ═══════════════════════════════════════════════════════════ */
+        #map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-warm);
+            z-index: 1;
+        }
+
+        .leaflet-tile {
+            filter: saturate(0.65) brightness(1.08);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           LAYER 2: TOP BAR (3 ELEMENTS ONLY)
+           ═══════════════════════════════════════════════════════════ */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(180deg, rgba(250, 249, 247, 0.98) 0%, rgba(250, 249, 247, 0.85) 100%);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .top-bar-left,
+        .top-bar-right {
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .top-bar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-white);
+            border: none;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .icon-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Hamburger Menu Icon */
+        .menu-icon {
+            width: 24px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .menu-icon span {
+            width: 100%;
+            height: 3px;
+            background: var(--text-dark);
+            border-radius: 2px;
+        }
+
+        .group-selector {
+            background: var(--bg-white);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .group-selector:active {
+            transform: scale(0.98);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SIDEBAR MENU
+           ═══════════════════════════════════════════════════════════ */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1500;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: var(--bg-white);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+            z-index: 1600;
+            transition: left 0.3s ease;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-profile-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-red);
+        }
+
+        .sidebar-user-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .sidebar-user-info p {
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .sidebar-menu-item {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 16px;
+            color: var(--text-dark);
+        }
+
+        .sidebar-menu-item:hover {
+            background: var(--bg-warm);
+        }
+
+        .sidebar-menu-item-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 20px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           LAYER 3: BOTTOM SHEET (Group Members List)
+           ═══════════════════════════════════════════════════════════ */
+        .bottom-sheet {
+            position: absolute;
+            bottom: 56px;
+            /* Above bottom navigation */
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+            z-index: 100;
+            /* Below top bar (1000) but above map (1) */
+            max-height: calc(100vh - 120px);
+            /* Leave space for top bar and bottom nav */
+            transform: translateY(calc(100% - 80px));
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: pan-y;
+            /* Allow vertical scrolling */
+        }
+
+        .bottom-sheet.expanded {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            margin: 12px auto 8px;
+            cursor: pointer;
+            touch-action: none;
+            /* Handle touch for dragging */
+        }
+
+        .sheet-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 16px;
+            flex-shrink: 0;
+            /* Don't shrink when scrolling */
+        }
+
+        .sheet-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sheet-tab.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+        }
+
+        .sheet-content {
+            padding: 16px;
+            max-height: calc(60vh - 120px);
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Member Item (Life360 Style) */
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .member-item:hover {
+            background: var(--bg-warm);
+        }
+
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-photo-container {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+        }
+
+        .member-photo {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-red);
+        }
+
+        .battery-indicator {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .battery-icon {
+            width: 12px;
+            height: 8px;
+            border: 1.5px solid currentColor;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 0 1px 1px 0;
+        }
+
+        .battery-fill {
+            position: absolute;
+            left: 1px;
+            top: 1px;
+            bottom: 1px;
+            background: currentColor;
+            border-radius: 1px;
+        }
+
+        .battery-high {
+            color: var(--battery-green);
+        }
+
+        .battery-medium {
+            color: var(--battery-orange);
+        }
+
+        .battery-low {
+            color: var(--battery-red);
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .member-location {
+            font-size: 14px;
+            color: var(--text-medium);
+            margin-bottom: 2px;
+        }
+
+        .member-time {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .add-person-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: var(--primary-red);
+            font-weight: 600;
+        }
+
+        .add-person-button:hover {
+            background: var(--bg-warm);
+        }
+
+        .add-person-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(200, 72, 72, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-medium);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           GROUP SELECTOR DIALOG (Life360 Style)
+           ═══════════════════════════════════════════════════════════ */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog-overlay.active {
+            display: flex;
+        }
+
+        .dialog {
+            background: var(--bg-white);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .dialog-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .dialog-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-warm);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog-content {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .circle-list {
+            margin-bottom: 20px;
+        }
+
+        .circle-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .circle-item:hover {
+            background: var(--bg-warm);
+        }
+
+        .circle-item.selected {
+            background: rgba(200, 72, 72, 0.1);
+        }
+
+        .circle-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .circle-info {
+            flex: 1;
+        }
+
+        .circle-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .circle-check {
+            font-size: 24px;
+            color: var(--primary-red);
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .dialog-button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 24px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dialog-button.primary {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .dialog-button.primary:active {
+            background: var(--primary-red-dark);
+        }
+
+        .dialog-button.secondary {
+            background: rgba(200, 72, 72, 0.1);
+            color: var(--primary-red);
+        }
+
+        .dialog-button.secondary:active {
+            background: rgba(200, 72, 72, 0.2);
+        }
+
+        .dialog-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            margin-bottom: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .dialog-input:focus {
+            outline: none;
+            border-color: var(--primary-red);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           USER LOCATION MARKER (LIFE360 STYLE)
+           ═══════════════════════════════════════════════════════════ */
+        .user-location-marker {
+            width: 58px;
+            height: 58px;
+            position: relative;
+        }
+
+        .user-photo-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--primary-red);
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 16px rgba(200, 72, 72, 0.3);
+        }
+
+        .user-photo-ring img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .accuracy-circle {
+            fill: var(--primary-red);
+            fill-opacity: 0.08;
+            stroke: var(--primary-red);
+            stroke-opacity: 0.25;
+            stroke-width: 1.5;
+        }
+
+        /* Member markers */
+        .member-marker {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .member-marker img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-marker.color-green {
+            border: 3px solid #10B981;
+        }
+
+        .member-marker.color-purple {
+            border: 3px solid #8B5CF6;
+        }
+
+        .member-marker.color-orange {
+            border: 3px solid #F59E0B;
+        }
+
+        .member-marker.color-blue {
+            border: 3px solid #3B82F6;
+        }
+
+        /* Leaflet overrides */
+        .leaflet-control-zoom {
+            display: none;
+        }
+
+        .leaflet-control-attribution {
+            font-size: 9px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 2px 5px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .leaflet-popup-content {
+            margin: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ═══════════════════════════════════════════════════════════
+         LAYER 1: MAP
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="map"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LAYER 2: TOP BAR (3 ELEMENTS ONLY)
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="icon-button" onclick="toggleSidebar()" aria-label="Menu">
+                <div class="menu-icon">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+        </div>
+        <div class="top-bar-center">
+            <div class="group-selector" onclick="showGroupDialog()">
+                <span>👥</span>
+                <span id="groupName">Shakti Alert Group</span>
+                <span>▼</span>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <button class="icon-button" onclick="openChat()" aria-label="Chat">💬</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SIDEBAR MENU
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23C84848'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E👤%3C/text%3E%3C/svg%3E"
+                class="sidebar-profile-photo" id="sidebarPhoto" alt="Profile">
+            <div class="sidebar-user-info">
+                <h3 id="sidebarName">User</h3>
+                <p id="sidebarEmail">user@example.com</p>
+            </div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="sidebar-menu-item" onclick="openProfile()">
+                <div class="sidebar-menu-item-icon">👤</div>
+                <div>Profile</div>
+            </div>
+            <div class="sidebar-menu-item" onclick="openSettings()">
+                <div class="sidebar-menu-item-icon">⚙️</div>
+                <div>Settings</div>
+            </div>
+            <div class="sidebar-menu-item" onclick="openNotifications()">
+                <div class="sidebar-menu-item-icon">🔔</div>
+                <div>Notifications</div>
+            </div>
+            <div class="sidebar-menu-item" onclick="openWhatsApp()">
+                <div class="sidebar-menu-item-icon">💬</div>
+                <div>WhatsApp</div>
+            </div>
+            <div class="sidebar-menu-item" onclick="openHelp()">
+                <div class="sidebar-menu-item-icon">❓</div>
+                <div>Help & Support</div>
+            </div>
+            <div class="sidebar-menu-item" onclick="logout()">
+                <div class="sidebar-menu-item-icon">🚪</div>
+                <div>Logout</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         LAYER 3: BOTTOM SHEET (Group Members)
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-handle" onclick="toggleBottomSheet()"></div>
+
+        <div class="sheet-tabs">
+            <div class="sheet-tab active" onclick="switchTab('people')">People</div>
+            <div class="sheet-tab" onclick="switchTab('places')">Places</div>
+            <div class="sheet-tab" onclick="switchTab('keys')">Keys</div>
+        </div>
+
+        <div class="sheet-content">
+            <!-- People Tab -->
+            <div id="peopleContent" class="tab-content active">
+                <!-- User profile will be added here automatically -->
+            </div>
+
+            <!-- Places Tab -->
+            <div id="placesContent" class="tab-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📍</div>
+                    <div class="empty-state-text">No saved places yet</div>
+                </div>
+            </div>
+
+            <!-- Keys Tab -->
+            <div id="keysContent" class="tab-content">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔑</div>
+                    <div class="empty-state-text">No shared keys yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         GROUP SELECTOR DIALOG
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="dialog-overlay" id="groupDialog">
+        <div class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Family</div>
+                <button class="dialog-close" onclick="closeGroupDialog()">✕</button>
+            </div>
+            <div class="dialog-content">
+                <div class="circle-list" id="circleList">
+                    <!-- Circles will be listed here -->
+                    <div class="circle-item selected">
+                        <div class="circle-icon">S</div>
+                        <div class="circle-info">
+                            <div class="circle-name">Shakti Alert Group</div>
+                        </div>
+                        <div class="circle-check">✓</div>
+                    </div>
+                </div>
+                <div class="dialog-actions">
+                    <button class="dialog-button primary" onclick="showCreateCircleDialog()">Create a Circle</button>
+                    <button class="dialog-button secondary" onclick="showJoinCircleDialog()">Join a Circle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Circle Dialog -->
+    <div class="dialog-overlay" id="createCircleDialog">
+        <div class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Create a Circle</div>
+                <button class="dialog-close" onclick="closeCreateCircleDialog()">✕</button>
+            </div>
+            <div class="dialog-content">
+                <input type="text" id="circleNameInput" class="dialog-input" placeholder="Enter circle name">
+                <div class="dialog-actions">
+                    <button class="dialog-button primary" onclick="createCircle()">Create</button>
+                    <button class="dialog-button secondary" onclick="closeCreateCircleDialog()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join Circle Dialog -->
+    <div class="dialog-overlay" id="joinCircleDialog">
+        <div class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Join a Circle</div>
+                <button class="dialog-close" onclick="closeJoinCircleDialog()">✕</button>
+            </div>
+            <div class="dialog-content">
+                <input type="text" id="inviteCodeInput" class="dialog-input"
+                    placeholder="Enter 6-character invite code">
+                <div class="dialog-actions">
+                    <button class="dialog-button primary" onclick="joinCircle()">Join</button>
+                    <button class="dialog-button secondary" onclick="closeJoinCircleDialog()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Code Result Dialog -->
+    <div class="dialog-overlay" id="inviteCodeDialog">
+        <div class="dialog">
+            <div class="dialog-header">
+                <div class="dialog-title">Circle Created!</div>
+                <button class="dialog-close" onclick="closeInviteCodeDialog()">✕</button>
+            </div>
+            <div class="dialog-content">
+                <p style="margin-bottom: 16px; color: var(--text-medium);">Share this invite code with others:</p>
+                <input type="text" id="generatedCode" class="dialog-input" readonly
+                    style="text-align: center; font-size: 24px; font-weight: 700; letter-spacing: 2px;">
+                <div class="dialog-actions">
+                    <button class="dialog-button primary" onclick="copyInviteCode()">Copy Code</button>
+                    <button class="dialog-button secondary" onclick="closeInviteCodeDialog()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // MAP INITIALIZATION
+        // ═══════════════════════════════════════════════════════════
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: true
+        }).setView([28.6139, 77.2090], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        // ═══════════════════════════════════════════════════════════
+        // STATE MANAGEMENT
+        // ═══════════════════════════════════════════════════════════
+        let userMarker = null;
+        let accuracyCircle = null;
+        let memberMarkers = {};
+        let isFirstUpdate = true;
+        let currentUserBattery = 100; // Will be updated from Android
+
+        // ═══════════════════════════════════════════════════════════
+        // BATTERY LEVEL (Get from Android)
+        // ═══════════════════════════════════════════════════════════
+        function getBatteryLevel() {
+            if (window.Android && window.Android.getBatteryLevel) {
+                return window.Android.getBatteryLevel();
+            }
+            // Fallback for browser testing
+            if (navigator.getBattery) {
+                navigator.getBattery().then(battery => {
+                    currentUserBattery = Math.round(battery.level * 100);
+                });
+            }
+            return currentUserBattery;
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // USER LOCATION MARKER (LIFE360 STYLE - RED RING)
+        // ═══════════════════════════════════════════════════════════
+        function createUserMarker(lat, lon, accuracy, photoUrl) {
+            console.log('Creating user marker:', lat, lon, accuracy);
+
+            // Accuracy circle
+            if (accuracyCircle) {
+                accuracyCircle.setLatLng([lat, lon]);
+                accuracyCircle.setRadius(accuracy);
+            } else {
+                accuracyCircle = L.circle([lat, lon], {
+                    radius: accuracy,
+                    className: 'accuracy-circle',
+                    interactive: false
+                }).addTo(map);
+            }
+
+            // User marker with red ring
+            const photoSrc = photoUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23C84848"/%3E%3Ctext x="50" y="65" font-size="50" text-anchor="middle" fill="white"%3E👤%3C/text%3E%3C/svg%3E';
+
+            const markerHtml = `
+                <div class="user-location-marker">
+                    <div class="user-photo-ring">
+                        <img src="${photoSrc}" alt="You" />
+                    </div>
+                </div>
+            `;
+
+            const icon = L.divIcon({
+                className: '',
+                html: markerHtml,
+                iconSize: [58, 58],
+                iconAnchor: [29, 29],
+                popupAnchor: [0, -29]
+            });
+
+            if (userMarker) {
+                userMarker.setLatLng([lat, lon]);
+                userMarker.setIcon(icon);
+            } else {
+                userMarker = L.marker([lat, lon], {
+                    icon: icon,
+                    zIndexOffset: 1000
+                }).addTo(map);
+
+                userMarker.bindPopup(`
+                    <div style="text-align: center;">
+                        <strong style="color: #C84848;">You</strong><br>
+                        <span style="color: #6B7280; font-size: 12px;">Current location</span>
+                    </div>
+                `);
+            }
+
+            // Center only on first load
+            if (isFirstUpdate) {
+                map.setView([lat, lon], 15, {
+                    animate: true,
+                    duration: 0.5
+                });
+                isFirstUpdate = false;
+            }
+
+            // Get real battery level
+            const battery = getBatteryLevel();
+
+            // Add to members list
+            updateMemberInList('me', 'You (Me)', 'At current location', 'Now', battery, photoSrc);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // MEMBER MARKERS
+        // ═══════════════════════════════════════════════════════════
+        const memberColors = ['green', 'purple', 'orange', 'blue'];
+        let colorIndex = 0;
+
+        function createMemberMarker(userId, name, lat, lon, photoUrl, status = 'Active', battery = 75, lastSeen = 'Now') {
+            const color = memberColors[colorIndex % memberColors.length];
+            if (!memberMarkers[userId]) colorIndex++;
+
+            const photoSrc = photoUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%236B7280"/%3E%3Ctext x="50" y="65" font-size="50" text-anchor="middle" fill="white"%3E👤%3C/text%3E%3C/svg%3E';
+
+            const markerHtml = `
+                <div class="member-marker color-${color}">
+                    <img src="${photoSrc}" alt="${name}" />
+                </div>
+            `;
+
+            const icon = L.divIcon({
+                className: '',
+                html: markerHtml,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24],
+                popupAnchor: [0, -24]
+            });
+
+            if (memberMarkers[userId]) {
+                memberMarkers[userId].setLatLng([lat, lon]);
+                memberMarkers[userId].setIcon(icon);
+            } else {
+                memberMarkers[userId] = L.marker([lat, lon], {
+                    icon: icon
+                }).addTo(map);
+
+                memberMarkers[userId].bindPopup(`
+                    <div style="text-align: center;">
+                        <strong>${name}</strong><br>
+                        <span style="color: #6B7280; font-size: 12px;">${status}</span>
+                    </div>
+                `);
+            }
+
+            // Add to members list
+            updateMemberInList(userId, name, status, lastSeen, battery, photoSrc);
+        }
+
+        function updateMemberInList(userId, name, location, time, battery, photoUrl) {
+            const peopleContent = document.getElementById('peopleContent');
+
+            // Check if member already exists
+            let memberItem = document.getElementById(`member-${userId}`);
+
+            if (!memberItem) {
+                memberItem = document.createElement('div');
+                memberItem.id = `member-${userId}`;
+                memberItem.className = 'member-item';
+                memberItem.onclick = () => focusMember(userId);
+
+                // Insert before "Add a person" button if it exists
+                const addButton = document.getElementById('addPersonButton');
+                if (addButton) {
+                    peopleContent.insertBefore(memberItem, addButton);
+                } else {
+                    peopleContent.appendChild(memberItem);
+                }
+            }
+
+            // Battery class
+            let batteryClass = 'battery-high';
+            if (battery < 30) batteryClass = 'battery-low';
+            else if (battery < 60) batteryClass = 'battery-medium';
+
+            memberItem.innerHTML = `
+                <div class="member-photo-container">
+                    <img src="${photoUrl}" alt="${name}" class="member-photo">
+                    <div class="battery-indicator ${batteryClass}">
+                        <div class="battery-icon">
+                            <div class="battery-fill" style="width: ${battery}%"></div>
+                        </div>
+                        <span>${battery}%</span>
+                    </div>
+                </div>
+                <div class="member-info">
+                    <div class="member-name">${name}</div>
+                    <div class="member-location">${location}</div>
+                    <div class="member-time">Since ${time}</div>
+                </div>
+            `;
+
+            // Add "Add a person" button if not exists
+            if (!document.getElementById('addPersonButton')) {
+                const addButton = document.createElement('div');
+                addButton.id = 'addPersonButton';
+                addButton.className = 'add-person-button';
+                addButton.onclick = () => showGroupDialog();
+                addButton.innerHTML = `
+                    <div class="add-person-icon">👥</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 16px; font-weight: 600;">Add a person</div>
+                    </div>
+                `;
+                peopleContent.appendChild(addButton);
+            }
+        }
+
+        function focusMember(userId) {
+            if (userId === 'me' && userMarker) {
+                map.setView(userMarker.getLatLng(), 16, {
+                    animate: true,
+                    duration: 0.5
+                });
+                userMarker.openPopup();
+            } else if (memberMarkers[userId]) {
+                const marker = memberMarkers[userId];
+                map.setView(marker.getLatLng(), 16, {
+                    animate: true,
+                    duration: 0.5
+                });
+                marker.openPopup();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ANDROID INTERFACE
+        // ═══════════════════════════════════════════════════════════
+        function updateUserLocation(lat, lon, accuracy, photoUrl) {
+            lat = parseFloat(lat);
+            lon = parseFloat(lon);
+            accuracy = parseFloat(accuracy) || 20;
+
+            if (isNaN(lat) || isNaN(lon) || (lat === 0 && lon === 0)) {
+                console.warn('Invalid coordinates:', lat, lon);
+                return;
+            }
+
+            createUserMarker(lat, lon, accuracy, photoUrl);
+        }
+
+        function updateMemberLocation(userId, name, lat, lon, photoUrl, status, battery, lastSeen) {
+            lat = parseFloat(lat);
+            lon = parseFloat(lon);
+            battery = parseInt(battery) || 75;
+
+            if (isNaN(lat) || isNaN(lon) || (lat === 0 && lon === 0)) {
+                console.warn('Invalid member coordinates:', lat, lon);
+                return;
+            }
+
+            createMemberMarker(userId, name, lat, lon, photoUrl, status, battery, lastSeen);
+        }
+
+        function setBatteryLevel(level) {
+            currentUserBattery = parseInt(level) || 100;
+            // Update user in list if already added
+            const userItem = document.getElementById('member-me');
+            if (userItem) {
+                const batteryIndicator = userItem.querySelector('.battery-indicator span');
+                if (batteryIndicator) {
+                    batteryIndicator.textContent = `${currentUserBattery}%`;
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // UI INTERACTIONS
+        // ═══════════════════════════════════════════════════════════
+
+        // Bottom Sheet Dragging
+        let sheetStartY = 0;
+        let sheetCurrentY = 0;
+        let isDragging = false;
+
+        function toggleBottomSheet() {
+            document.getElementById('bottomSheet').classList.toggle('expanded');
+        }
+
+        // Make bottom sheet draggable
+        const bottomSheet = document.getElementById('bottomSheet');
+        const sheetHandle = bottomSheet.querySelector('.sheet-handle');
+
+        sheetHandle.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            sheetStartY = e.touches[0].clientY;
+            bottomSheet.style.transition = 'none';
+        });
+
+        sheetHandle.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+
+            const touchY = e.touches[0].clientY;
+            const deltaY = touchY - sheetStartY;
+
+            // Only allow dragging down when expanded, or up when collapsed
+            if (bottomSheet.classList.contains('expanded')) {
+                if (deltaY > 0) { // Dragging down
+                    bottomSheet.style.transform = `translateY(${deltaY}px)`;
+                }
+            } else {
+                if (deltaY < 0) { // Dragging up
+                    const currentTransform = window.innerHeight * 0.6 - 80; // collapsed position
+                    bottomSheet.style.transform = `translateY(${currentTransform + deltaY}px)`;
+                }
+            }
+        });
+
+        sheetHandle.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const touchY = e.changedTouches[0].clientY;
+            const deltaY = touchY - sheetStartY;
+
+            bottomSheet.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+            // Threshold for toggling (50px)
+            if (Math.abs(deltaY) > 50) {
+                if (deltaY > 0) {
+                    // Dragged down - collapse
+                    bottomSheet.classList.remove('expanded');
+                    bottomSheet.style.transform = '';
+                } else {
+                    // Dragged up - expand
+                    bottomSheet.classList.add('expanded');
+                    bottomSheet.style.transform = '';
+                }
+            } else {
+                // Snap back to current state
+                bottomSheet.style.transform = '';
+            }
+        });
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.sheet-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}Content`).classList.add('active');
+        }
+
+        // Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        function openProfile() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onProfileClicked();
+            } else {
+                console.log('Profile');
+            }
+        }
+
+        function openSettings() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onSettingsClicked();
+            } else {
+                console.log('Settings');
+            }
+        }
+
+        function openNotifications() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onNotificationsClicked();
+            } else {
+                console.log('Notifications');
+            }
+        }
+
+        function openWhatsApp() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onWhatsAppClicked();
+            } else {
+                console.log('WhatsApp');
+            }
+        }
+
+        function openHelp() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onHelpClicked();
+            } else {
+                console.log('Help');
+            }
+        }
+
+        function logout() {
+            closeSidebar();
+            if (window.Android) {
+                window.Android.onLogoutClicked();
+            } else {
+                console.log('Logout');
+            }
+        }
+
+        // Group Dialog
+        function showGroupDialog() {
+            document.getElementById('groupDialog').classList.add('active');
+        }
+
+        function closeGroupDialog() {
+            document.getElementById('groupDialog').classList.remove('active');
+        }
+
+        function showCreateCircleDialog() {
+            closeGroupDialog();
+            document.getElementById('createCircleDialog').classList.add('active');
+        }
+
+        function closeCreateCircleDialog() {
+            document.getElementById('createCircleDialog').classList.remove('active');
+        }
+
+        function showJoinCircleDialog() {
+            closeGroupDialog();
+            document.getElementById('joinCircleDialog').classList.add('active');
+        }
+
+        function closeJoinCircleDialog() {
+            document.getElementById('joinCircleDialog').classList.remove('active');
+        }
+
+        function closeInviteCodeDialog() {
+            document.getElementById('inviteCodeDialog').classList.remove('active');
+        }
+
+        function createCircle() {
+            const circleName = document.getElementById('circleNameInput').value.trim();
+            if (!circleName) {
+                alert('Please enter a circle name');
+                return;
+            }
+
+            try {
+                if (window.Android && typeof window.Android.onCreateCircle === 'function') {
+                    console.log('Calling Android.onCreateCircle with:', circleName);
+                    window.Android.onCreateCircle(circleName);
+                } else {
+                    console.warn('Android interface not available, using demo mode');
+                    // Generate demo code for browser testing
+                    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    document.getElementById('generatedCode').value = code;
+                    closeCreateCircleDialog();
+                    document.getElementById('inviteCodeDialog').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error creating circle:', error);
+                alert('Error: ' + error.message + '\n\nPlease check if you are logged in and try again.');
+                closeCreateCircleDialog();
+            }
+        }
+
+        function joinCircle() {
+            const inviteCode = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
+            if (!inviteCode) {
+                alert('Please enter an invite code');
+                return;
+            }
+
+            if (window.Android && window.Android.onJoinCircle) {
+                window.Android.onJoinCircle(inviteCode);
+            } else {
+                alert('Joined circle with code: ' + inviteCode);
+                closeJoinCircleDialog();
+            }
+        }
+
+        function copyInviteCode() {
+            const code = document.getElementById('generatedCode').value;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Invite code copied!');
+            });
+        }
+
+        // Top Bar Actions
+        function openChat() {
+            if (window.Android && window.Android.onChatClicked) {
+                window.Android.onChatClicked();
+            } else {
+                console.log('💬 Chat');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // LOAD REAL USER DATA
+        // ═══════════════════════════════════════════════════════════
+        function loadUserData() {
+            if (window.Android && window.Android.getUserData) {
+                try {
+                    const userData = JSON.parse(window.Android.getUserData());
+
+                    // Update sidebar
+                    if (userData.name) {
+                        document.getElementById('sidebarName').textContent = userData.name;
+                    }
+                    if (userData.email) {
+                        document.getElementById('sidebarEmail').textContent = userData.email;
+                    }
+                    if (userData.photoUri) {
+                        document.getElementById('sidebarPhoto').src = userData.photoUri;
+                    }
+
+                    console.log('✅ User data loaded:', userData.name, userData.email);
+                } catch (e) {
+                    console.warn('Could not load user data:', e.message);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZE ON PAGE LOAD
+        // ═══════════════════════════════════════════════════════════
+        window.addEventListener('DOMContentLoaded', function () {
+            console.log('🗺️ Shakti Alert Map - Life360 Style with Real Battery');
+            console.log('✅ Hamburger menu | Real battery indicator | User profile in People tab');
+
+            // Load real user data
+            loadUserData();
+
+            // Show demo user profile immediately so People tab is never empty
+            setTimeout(function () {
+                const battery = getBatteryLevel();
+                const demoPhotoUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23C84848"/%3E%3Ctext x="50" y="65" font-size="50" text-anchor="middle" fill="white"%3E👤%3C/text%3E%3C/svg%3E';
+
+                updateMemberInList('me', 'You (Me)', 'Waiting for location...', 'Now', battery, demoPhotoUrl);
+
+                // Start with bottom sheet collapsed (user can swipe up)
+                document.getElementById('bottomSheet').classList.remove('expanded');
+
+                console.log('✅ Demo user profile added to People tab');
+                console.log('✅ Bottom sheet ready (swipe up to expand)');
+            }, 500);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* custom red-black gradient */
+:root{
+  --r1:#b71c1c; --r2:#8b0000; --d:#0b0b0b;
+}
+body{
+  @apply bg-gradient-to-br from-[#8b0000] via-[#b71c1c] to-[#2b0a0a];
+  color: #fff;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  overflow-x: hidden;
+}
+.container { max-width:1200px; margin:0 auto; padding:2rem; }
+.card { background:rgba(0,0,0,0.35); border-radius:14px; padding:1.6rem; box-shadow: 0 6px 30px rgba(0,0,0,0.6); }
+.btn { @apply px-4 py-2 rounded-md font-semibold; }
+.btn-cta { background:linear-gradient(50deg,#ff3b3b,#b71c1c); color:#fff; }
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hide "Built with Spline" watermark safely for demo */
+iframe[src*="spline.design"] + div,
+iframe[src*="spline.design"] ~ div,
+iframe[src*="spline.design"] {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+iframe[src*="spline.design"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* This targets watermark container (demo safe) */
+div[style*="spline.design"] {
+  display: none !important;
+}
+

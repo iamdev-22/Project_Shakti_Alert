@@ -1,0 +1,18 @@
+.liquid-ether-container {
+  position: absolute;
+  inset: 0;
+  width: 120%;
+  margin-top: -200px;
+  margin-left: -10%;
+  height: 140vh;
+  overflow: hidden;
+  touch-action: none;
+  z-index: -10; /* background */
+  background-color: linear-gradient(
+  135deg,
+  #000000 0%,
+  #1a0000 25%,
+  #660000 60%,
+  #ff0000 100%
+);
+}

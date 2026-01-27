@@ -1,0 +1,22 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Dark Mode Theme -->
+    <style name="Theme.ShaktiAlertApp" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Primary color (Red for Shakti) -->
+        <item name="colorPrimary">#EF4444</item>
+        <item name="colorPrimaryVariant">#B91C1C</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        
+        <!-- Secondary color -->
+        <item name="colorSecondary">#EF4444</item>
+        <item name="colorSecondaryVariant">#B91C1C</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">#000000</item>
+        
+        <!-- Background colors -->
+        <item name="android:windowBackground">#121212</item>
+        <item name="colorSurface">#1E1E1E</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+    </style>
+</resources>

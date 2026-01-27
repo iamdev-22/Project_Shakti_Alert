@@ -1,0 +1,30 @@
+{
+  "name": "shakti-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.15.17",
+    "@splinetool/react-spline": "^4.1.0",
+    "axios": "^1.13.2",
+    "framer-motion": "^12.23.24",
+    "leaflet": "^1.9.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.9.5",
+    "three": "^0.156.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.0",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "tailwindcss": "3.4.13",
+    "vite": "^5.4.21"
+  }
+}

@@ -1,0 +1,10 @@
+    private fun startPeriodicMemberReload(webView: WebView) {
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        val runnable = object : Runnable {
+            override fun run() {
+                loadCircleMembersForMap(webView)
+                handler.postDelayed(this, 10000) // Reload every 10 seconds
+            }
+        }
+        handler.postDelayed(runnable, 10000) // Start after 10 seconds
+    }

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Shakti Alert - Live Location (DEMO)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #D84848;
+            --primary-red-dark: #C23838;
+            --primary-red-light: #E86868;
+            --accent-red: rgba(216, 72, 72, 0.12);
+            --bg-warm: #FAF9F7;
+            --bg-white: #FFFFFF;
+            --text-dark: #1F2937;
+            --text-medium: #6B7280;
+            --text-light: #9CA3AF;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-warm);
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            background: var(--bg-warm);
+        }
+
+        .leaflet-tile {
+            filter: saturate(0.65) brightness(1.08);
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(180deg, rgba(250, 249, 247, 0.98) 0%, rgba(250, 249, 247, 0.85) 100%);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .group-selector {
+            background: var(--bg-white);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .group-selector:active {
+            transform: scale(0.98);
+        }
+
+        .group-icon {
+            font-size: 18px;
+        }
+
+        .settings-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-white);
+            border: none;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .settings-button:active {
+            transform: scale(0.95);
+        }
+
+        .floating-actions {
+            position: absolute;
+            right: 16px;
+            top: 84px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 900;
+        }
+
+        .fab-button {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--bg-white);
+            border: none;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .fab-button:active {
+            transform: scale(0.93);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .fab-button.sos {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-red);
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(216, 72, 72, 0.35);
+        }
+
+        .fab-button.sos:active {
+            background: var(--primary-red-dark);
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
+            z-index: 800;
+            transform: translateY(calc(100% - 56px));
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bottom-sheet.expanded {
+            transform: translateY(0);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--border-light);
+            border-radius: 2px;
+            margin: 12px auto 8px;
+            cursor: pointer;
+        }
+
+        .sheet-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 16px;
+        }
+
+        .sheet-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .sheet-tab.active {
+            color: var(--primary-red);
+            border-bottom-color: var(--primary-red);
+        }
+
+        .sheet-content {
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .member-item:hover {
+            background: var(--bg-warm);
+        }
+
+        .member-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .member-status {
+            font-size: 13px;
+            color: var(--text-medium);
+        }
+
+        .member-distance {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary-red);
+        }
+
+        .nav-item:not(.active) {
+            color: var(--text-light);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .user-location-marker {
+            width: 58px;
+            height: 58px;
+            position: relative;
+        }
+
+        .user-photo-ring {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--primary-red);
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 16px rgba(216, 72, 72, 0.3);
+        }
+
+        .user-photo-ring img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-marker {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: white;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .member-marker img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-marker.color-green {
+            border: 3px solid #10B981;
+        }
+
+        .member-marker.color-purple {
+            border: 3px solid #8B5CF6;
+        }
+
+        .member-marker.color-orange {
+            border: 3px solid #F59E0B;
+        }
+
+        .member-marker.color-blue {
+            border: 3px solid #3B82F6;
+        }
+
+        .accuracy-circle {
+            fill: var(--primary-red);
+            fill-opacity: 0.08;
+            stroke: var(--primary-red);
+            stroke-opacity: 0.25;
+            stroke-width: 1.5;
+        }
+
+        .member-tooltip {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .member-tooltip-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .member-tooltip-status {
+            color: var(--text-medium);
+            font-size: 12px;
+        }
+
+        .leaflet-control-zoom {
+            display: none;
+        }
+
+        .leaflet-control-attribution {
+            font-size: 9px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 2px 5px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .leaflet-popup-content {
+            margin: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .leaflet-marker-icon,
+        .leaflet-marker-shadow {
+            transition: transform 0.3s ease-out;
+        }
+
+        .demo-badge {
+            position: absolute;
+            top: 74px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-red);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1001;
+            box-shadow: var(--shadow-md);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div class="demo-badge">✨ DEMO MODE</div>
+    <div class="top-bar">
+        <div class="group-selector" onclick="alert('Group selector clicked')">
+            <span class="group-icon">👥</span>
+            <span>Shakti Alert Group</span>
+        </div>
+        <button class="settings-button" onclick="alert('Settings clicked')">⚙️</button>
+    </div>
+    <div class="floating-actions">
+        <button class="fab-button" onclick="alert('💬 Opening chat...')" title="Chat">💬</button>
+        <button class="fab-button" onclick="alert('➕ Add member...')" title="Add Member">➕</button>
+        <button class="fab-button sos" onclick="if(confirm('⚠️ Trigger Emergency SOS?')) alert('🚨 SOS Alert Sent!')"
+            title="Emergency SOS">SOS</button>
+    </div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-handle" onclick="toggleBottomSheet()"></div>
+        <div class="sheet-tabs">
+            <div class="sheet-tab active" data-tab="people" onclick="switchTab('people')">People</div>
+            <div class="sheet-tab" data-tab="places" onclick="switchTab('places')">Places</div>
+            <div class="sheet-tab" data-tab="keys" onclick="switchTab('keys')">Keys</div>
+        </div>
+        <div class="sheet-content">
+            <div id="peopleContent" class="tab-content"></div>
+            <div id="placesContent" class="tab-content" style="display: none;">
+                <div style="text-align: center; padding: 32px; color: #6B7280;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">📍</div>
+                    <div style="font-size: 14px;">No saved places yet</div>
+                </div>
+            </div>
+            <div id="keysContent" class="tab-content" style="display: none;">
+                <div style="text-align: center; padding: 32px; color: #6B7280;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">🔑</div>
+                    <div style="font-size: 14px;">No shared keys yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchNav(0)">
+            <div class="nav-icon">📍</div>
+            <div class="nav-label">Map</div>
+        </div>
+        <div class="nav-item" onclick="switchNav(1)">
+            <div class="nav-icon">🚗</div>
+            <div class="nav-label">Driving</div>
+        </div>
+        <div class="nav-item" onclick="switchNav(2)">
+            <div class="nav-icon">🛡️</div>
+            <div class="nav-label">Safety</div>
+        </div>
+        <div class="nav-item" onclick="switchNav(3)">
+            <div class="nav-icon">👤</div>
+            <div class="nav-label">Profile</div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([28.6139, 77.2090], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19, className: 'map-tiles' }).addTo(map);
+        let userMarker = null, accuracyCircle = null, memberMarkers = {}, isFirstUpdate = true, lastKnownPosition = null;
+        const memberColors = ['green', 'purple', 'orange', 'blue'];
+        let colorIndex = 0;
+
+        function createUserMarker(lat, lon, accuracy, photoUrl) {
+            lastKnownPosition = [lat, lon];
+            const photoSrc = photoUrl || 'https://i.pravatar.cc/150?img=47';
+            if (accuracyCircle) { accuracyCircle.setLatLng([lat, lon]); accuracyCircle.setRadius(accuracy); }
+            else { accuracyCircle = L.circle([lat, lon], { radius: accuracy, className: 'accuracy-circle', interactive: false }).addTo(map); }
+            const markerHtml = `<div class="user-location-marker"><div class="user-photo-ring"><img src="${photoSrc}" alt="You" /></div></div>`;
+            const icon = L.divIcon({ className: '', html: markerHtml, iconSize: [58, 58], iconAnchor: [29, 29], popupAnchor: [0, -29] });
+            if (userMarker) { userMarker.setLatLng([lat, lon]); userMarker.setIcon(icon); }
+            else { userMarker = L.marker([lat, lon], { icon: icon, zIndexOffset: 1000 }).addTo(map); userMarker.bindPopup('<div style="text-align: center;"><strong style="color: #D84848;">You</strong><br><span style="color: #6B7280; font-size: 12px;">Current location</span></div>'); }
+            if (isFirstUpdate) { map.setView([lat, lon], 15, { animate: true, duration: 0.5 }); isFirstUpdate = false; }
+        }
+
+        function createMemberMarker(userId, name, lat, lon, photoUrl, status) {
+            const color = memberColors[colorIndex % memberColors.length];
+            if (!memberMarkers[userId]) colorIndex++;
+            const photoSrc = photoUrl || 'https://i.pravatar.cc/150?img=' + (10 + colorIndex);
+            const markerHtml = `<div class="member-marker color-${color}"><img src="${photoSrc}" alt="${name}" /></div>`;
+            const icon = L.divIcon({ className: '', html: markerHtml, iconSize: [48, 48], iconAnchor: [24, 24], popupAnchor: [0, -24] });
+            if (memberMarkers[userId]) { memberMarkers[userId].setLatLng([lat, lon]); memberMarkers[userId].setIcon(icon); }
+            else { memberMarkers[userId] = L.marker([lat, lon], { icon: icon }).addTo(map); memberMarkers[userId].bindPopup(`<div class="member-tooltip"><div class="member-tooltip-name">${name}</div><div class="member-tooltip-status">${status}</div></div>`); }
+            updatePeopleList(userId, name, status);
+        }
+
+        function updatePeopleList(userId, name, status) {
+            const peopleContent = document.getElementById('peopleContent');
+            let memberItem = document.getElementById(`member-${userId}`);
+            if (!memberItem) {
+                memberItem = document.createElement('div');
+                memberItem.id = `member-${userId}`;
+                memberItem.className = 'member-item';
+                memberItem.onclick = () => { if (memberMarkers[userId]) { map.setView(memberMarkers[userId].getLatLng(), 16, { animate: true, duration: 0.5 }); memberMarkers[userId].openPopup(); } };
+                peopleContent.appendChild(memberItem);
+            }
+            memberItem.innerHTML = `<div class="member-avatar">${name.charAt(0).toUpperCase()}</div><div class="member-info"><div class="member-name">${name}</div><div class="member-status">${status}</div></div><div class="member-distance">-</div>`;
+        }
+
+        function toggleBottomSheet() { document.getElementById('bottomSheet').classList.toggle('expanded'); }
+        function switchTab(tabName) {
+            document.querySelectorAll('.sheet-tab').forEach(tab => { tab.classList.remove('active'); if (tab.dataset.tab === tabName) tab.classList.add('active'); });
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            document.getElementById(`${tabName}Content`).style.display = 'block';
+        }
+        function switchNav(index) { document.querySelectorAll('.nav-item').forEach((item, i) => item.classList.toggle('active', i === index)); }
+
+        // DEMO DATA
+        setTimeout(() => {
+            createUserMarker(28.6139, 77.2090, 25, null);
+            createMemberMarker('dad', 'Dad', 28.6155, 77.2105, null, 'At home');
+            createMemberMarker('mom', 'Mom', 28.6125, 77.2075, null, 'Driving');
+            createMemberMarker('sister', 'Sister', 28.6165, 77.2115, null, 'At school');
+            console.log('✅ Demo data loaded');
+        }, 1000);
+
+        console.log('🗺️ Shakti Alert Map - DEMO MODE');
+    </script>
+</body>
+
+</html>

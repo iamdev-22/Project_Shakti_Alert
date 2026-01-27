@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
+    android:padding="24dp">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SHAKTI ALERT"
+        android:textColor="@color/white"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.15"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="48dp"/>
+    
+    <!-- AI Help Button -->
+    <ImageButton
+        android:id="@+id/btnAiHelp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_menu_help"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:tint="@color/white"
+        android:contentDescription="AI Help"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"/>
+        
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status: Secured"
+        android:textColor="#EEFAFAFA"
+        android:textSize="14sp"
+        android:background="@drawable/bg_pill_white"
+        android:backgroundTint="#33FFFFFF"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintTop_toBottomOf="@id/tvHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"/>
+
+
+    <!-- Voice Animation Container (ChatGPT Dot Wave Style) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/voiceContainer"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:layout_constraintTop_toBottomOf="@id/tvStatus"
+        app:layout_constraintBottom_toTopOf="@id/controlsContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        
+        <!-- Dot Wave Circle Container -->
+        <FrameLayout
+            android:id="@+id/dotWaveContainer"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            
+            <!-- Dots will be added programmatically in a circle -->
+            <!-- This creates the wave effect like ChatGPT -->
+            
+        </FrameLayout>
+            
+        <!-- Microphone Icon in Center -->
+        <ImageView
+            android:id="@+id/micIcon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@android:drawable/ic_btn_speak_now"
+            android:tint="@color/white"
+            app:layout_constraintTop_toTopOf="@id/dotWaveContainer"
+            app:layout_constraintBottom_toBottomOf="@id/dotWaveContainer"
+            app:layout_constraintStart_toStartOf="@id/dotWaveContainer"
+            app:layout_constraintEnd_toEndOf="@id/dotWaveContainer"
+            android:elevation="5dp"/>
+
+        <!-- Trigger Button Overlay -->
+        <View
+            android:id="@+id/btnTrigger"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Bottom Controls -->
+    <LinearLayout
+        android:id="@+id/controlsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="32dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStartService"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:text="START"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/life360_primary"
+                android:backgroundTint="@color/white"
+                app:icon="@android:drawable/ic_media_play"
+                app:iconTint="@color/life360_primary"
+                app:cornerRadius="30dp"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnStopService"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="60dp"
+                android:text="STOP"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:backgroundTint="#33000000"
+                app:icon="@android:drawable/ic_media_pause"
+                app:iconTint="@color/white"
+                app:cornerRadius="30dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnroll"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="VOICE SETUP"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:backgroundTint="#44000000"
+            app:cornerRadius="28dp"
+            app:icon="@android:drawable/ic_btn_speak_now"
+            app:iconTint="@color/white"
+            android:layout_marginHorizontal="32dp"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
