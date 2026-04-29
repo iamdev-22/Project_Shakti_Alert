@@ -39,7 +39,8 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     private lateinit var locationManager: LocationManager
     private lateinit var sensorManager: SensorManager
     private var speechRecognizer: SpeechRecognizer? = null
-    private var recorder: MediaRecorder? = null
+    private var recorder: MediaRecorder? = null       // Video recorder
+    private var audioRecorder: MediaRecorder? = null   // Audio recorder (separate!)
     private var camera: Camera? = null
     private var videoFile: File? = null
     private var audioFile: File? = null
@@ -54,6 +55,15 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     private var currentLon = 0.0
     private var tts: TextToSpeech? = null
     private var wakeLock: PowerManager.WakeLock? = null
+    
+    // ⏱️ ALERT COOLDOWN - Prevent spam but allow legitimate repeated calls for help
+    private var lastAlertTime = 0L
+    private val MIN_ALERT_INTERVAL = 20_000L // 20 seconds (reduced from 30s)
+    
+    // 🔒 SPEECH RECOGNITION STATE - Prevent overlapping sessions
+    private var isRecognitionActive = false
+    private var lastHelpDetectionTime = 0L
+    private val HELP_DETECTION_DEBOUNCE = 800L // 800ms - just enough to prevent same utterance duplicates
 
     override fun onCreate() {
         super.onCreate()
@@ -202,10 +212,18 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     private fun startSpeechRecognition() {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) return
         
+        // Prevent overlapping recognition sessions
+        if (isRecognitionActive) {
+            Log.d(TAG, "⚠️ Speech recognition already active, skipping restart")
+            return
+        }
+        
         handler.post {
             if (speechRecognizer == null) {
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
             }
+            
+            isRecognitionActive = true
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
@@ -230,28 +248,83 @@ class AlertService : Service(), LocationListener, SensorEventListener {
                 override fun onBufferReceived(buffer: ByteArray?) {}
                 override fun onEndOfSpeech() {
                     // Don't broadcast - stay silent
+                    isRecognitionActive = false
                 }
                 override fun onError(error: Int) {
-                    // Restart listening after error (e.g. no speech)
-                    handler.postDelayed({ startSpeechRecognition() }, 1000)
+                    isRecognitionActive = false
+                    // Restart listening after error with longer delay to prevent CPU overload
+                    val errorName = when(error) {
+                        SpeechRecognizer.ERROR_NO_MATCH -> "NO_MATCH"
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "TIMEOUT"
+                        SpeechRecognizer.ERROR_NETWORK -> "NETWORK"
+                        else -> "ERROR_$error"
+                    }
+                    Log.d(TAG, "Speech recognition error: $errorName - will restart in 2s")
+                    handler.postDelayed({ startSpeechRecognition() }, 2000) // Increased from 1s to 2s
                 }
                 override fun onResults(results: Bundle?) {
+                    isRecognitionActive = false
                     val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     if (!matches.isNullOrEmpty()) {
                         val text = matches[0].lowercase(Locale.getDefault())
-                        Log.d(TAG, "Voice detected: $text")
+                        Log.d(TAG, "🎤 Voice detected: '$text'")
+                        
                         if (text.contains("help") || text.contains("bachao") || text.contains("save me")) {
-                            // ⚡ INSTANT ALERT - Send WhatsApp IMMEDIATELY (no verification delay)
-                            broadcastStatus("Help Detected! Sending instant alert...")
-                            sendQuickAlert("Voice Triggered Emergency (Help Detected)")
+                            val now = System.currentTimeMillis()
+                            val timeSinceLastHelpDetection = now - lastHelpDetectionTime
                             
-                            // Then start recording media in background (non-blocking)
-                            handler.postDelayed({
-                                triggerEmergency("Voice Triggered Emergency")
-                            }, 500) // Small delay to let quick alert send first
+                            Log.d(TAG, "🚨 HELP WORD DETECTED! Text: '$text'")
+                            Log.d(TAG, "   Time since last detection: ${timeSinceLastHelpDetection}ms")
+                            
+                            // 🔒 QUICK DEBOUNCE - Only prevent SAME utterance (800ms window)
+                            if (timeSinceLastHelpDetection < HELP_DETECTION_DEBOUNCE) {
+                                Log.d(TAG, "   ⚠️ DEBOUNCED - Same utterance detected within ${timeSinceLastHelpDetection}ms")
+                                handler.postDelayed({ startSpeechRecognition() }, 1000)
+                                return
+                            }
+                            
+                            // Update last detection time
+                            lastHelpDetectionTime = now
+                            
+                            // ⏱️ CHECK COOLDOWN - Prevent spam but allow repeated calls
+                            val timeSinceLastAlert = now - lastAlertTime
+                            Log.d(TAG, "   Time since last alert: ${timeSinceLastAlert}ms (cooldown: ${MIN_ALERT_INTERVAL}ms)")
+                            
+                            if (timeSinceLastAlert >= MIN_ALERT_INTERVAL) {
+                                Log.d(TAG, "   ✅ SENDING FULL ALERT WITH MEDIA NOW!")
+                                lastAlertTime = now
+                                
+                                // 🚨 Send FULL ALERT with media recording (ONE alert only - no duplicates)
+                                broadcastStatus("Help Detected! Recording and sending alert...")
+                                
+                                // Show user feedback
+                                handler.post {
+                                    Toast.makeText(this@AlertService,
+                                        "🚨 ALERT TRIGGERED!\n📹 Recording video and audio...",
+                                        Toast.LENGTH_LONG).show()
+                                }
+                                
+                                // Start full emergency alert with media recording immediately
+                                Log.d(TAG, "📹 Triggering full emergency alert with media...")
+                                triggerEmergency("Voice Triggered Emergency - Help Detected")
+                            } else {
+                                val remainingSeconds = (MIN_ALERT_INTERVAL - timeSinceLastAlert) / 1000
+                                Log.d(TAG, "   ⏱️ COOLDOWN ACTIVE - Wait ${remainingSeconds}s")
+                                handler.post {
+                                    broadcastStatus("⏱️ Alert sent ${remainingSeconds}s ago. Wait ${remainingSeconds}s more.")
+                                    Toast.makeText(this@AlertService,
+                                        "⏱️ Alert sent ${remainingSeconds}s ago. Wait ${remainingSeconds}s more.",
+                                        Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "   No help word in: '$text'")
                         }
+                    } else {
+                        Log.d(TAG, "   No speech detected")
                     }
-                    handler.postDelayed({ startSpeechRecognition() }, 500)
+                    // Restart listening quickly
+                    handler.postDelayed({ startSpeechRecognition() }, 1000)
                 }
                 override fun onPartialResults(partialResults: Bundle?) {}
                 override fun onEvent(eventType: Int, params: Bundle?) {}
@@ -275,7 +348,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     // ⚡ INSTANT QUICK ALERT - Send WhatsApp IMMEDIATELY (2-3 seconds)
     private fun sendQuickAlert(reason: String) {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         val url = "$baseUrl/quick_alert"
         
         Log.d(TAG, "⚡ Sending INSTANT alert to: $url")
@@ -304,18 +377,50 @@ class AlertService : Service(), LocationListener, SensorEventListener {
             
             override fun onResponse(call: Call, response: Response) {
                 val responseBody = response.body?.string() ?: ""
+                val statusCode = response.code
                 response.close()
                 
+                Log.d(TAG, "✅ Quick Alert Response Code: $statusCode")
                 Log.d(TAG, "✅ Quick Alert Response: $responseBody")
                 
                 handler.post {
-                    if (responseBody.contains("\"whatsapp_sent\":true")) {
-                        broadcastStatus("✅ Guardian notified via WhatsApp!")
-                        Toast.makeText(this@AlertService, 
-                            "🚨 Guardian alerted!\n📱 WhatsApp sent in 2 seconds!", 
-                            Toast.LENGTH_LONG).show()
-                    } else {
-                        broadcastStatus("Alert sent to server")
+                    when {
+                        // Server cooldown - alert already sent recently
+                        statusCode == 429 || responseBody.contains("\"status\":\"cooldown\"") -> {
+                            val cooldownMsg = if (responseBody.contains("cooldown_remaining")) {
+                                try {
+                                    val remaining = responseBody.substringAfter("cooldown_remaining\":").substringBefore(",").trim()
+                                    "⏱️ Alert already sent. Server cooldown: $remaining seconds"
+                                } catch (e: Exception) {
+                                    "⏱️ Alert already sent. Please wait before sending another."
+                                }
+                            } else {
+                                "⏱️ Alert already sent. Please wait before sending another."
+                            }
+                            broadcastStatus(cooldownMsg)
+                            Toast.makeText(this@AlertService, cooldownMsg, Toast.LENGTH_LONG).show()
+                        }
+                        // Success - WhatsApp sent
+                        responseBody.contains("\"whatsapp_sent\":true") -> {
+                            broadcastStatus("✅ Guardian notified via WhatsApp!")
+                            Toast.makeText(this@AlertService, 
+                                "🚨 Guardian alerted!\n📱 WhatsApp sent in 2 seconds!", 
+                                Toast.LENGTH_LONG).show()
+                        }
+                        // Partial success or WhatsApp offline
+                        statusCode in 200..299 -> {
+                            broadcastStatus("Alert sent to server")
+                            Toast.makeText(this@AlertService,
+                                "⚠️ Alert sent but WhatsApp may be offline",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                        // Server error
+                        else -> {
+                            broadcastStatus("Server error: $statusCode")
+                            Toast.makeText(this@AlertService,
+                                "❌ Server error: $statusCode",
+                                Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -373,7 +478,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     // 🔐 Verify voice with backend
     private fun verifyVoiceWithBackend(audioFile: File) {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         val url = "$baseUrl/verify_voice"
         
         val form = MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -550,7 +655,8 @@ class AlertService : Service(), LocationListener, SensorEventListener {
             val dir = File(getExternalFilesDir(null), "audio")
             if (!dir.exists()) dir.mkdirs()
             audioFile = File(dir, "audio_${System.currentTimeMillis()}.mp3")
-            val audioRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // ✅ FIX: Store in separate audioRecorder variable - NOT the video recorder!
+            audioRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 MediaRecorder(this)
             } else {
                 @Suppress("DEPRECATION")
@@ -563,6 +669,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
                 prepare()
                 start()
             }
+            Log.d(TAG, "✅ Audio recording started: ${audioFile!!.absolutePath}")
         } catch (e: Exception) {
             Log.e(TAG, "Audio record failed: ${e.message}")
         }
@@ -570,8 +677,11 @@ class AlertService : Service(), LocationListener, SensorEventListener {
 
     private fun stopAudioRecording() {
         try {
-            recorder?.stop()
-            recorder?.release()
+            // ✅ FIX: Use audioRecorder, NOT recorder (video recorder)
+            audioRecorder?.stop()
+            audioRecorder?.release()
+            audioRecorder = null
+            Log.d(TAG, "✅ Audio recording stopped")
         } catch (e: Exception) {
             Log.e(TAG, "Stop audio failed: ${e.message}")
         }
@@ -656,7 +766,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     // -------------------- ⚠️ DANGER ZONE CHECK --------------------
     private fun checkDangerZone(lat: Double, lon: Double) {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         val url = "$baseUrl/community/danger_zones" // Using the new endpoint if preferred, or keep existing logic
 
         // For now, let's keep the simple prediction endpoint if it exists, or use the new one.
@@ -700,7 +810,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
         
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
         // ✅ FIXED: Using local network IP instead of expired ngrok URL
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         val url = "$baseUrl/upload_alert"
 
         
@@ -814,7 +924,7 @@ class AlertService : Service(), LocationListener, SensorEventListener {
     // 🌍 Upload live location with accuracy (overloaded method)
     private fun uploadLocation(lat: Double, lon: Double, accuracy: Float = 0f) {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.42:5000") ?: "http://192.168.1.42:5000"
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         val token = prefs.getString("auth_token", "") ?: ""
         val url = "$baseUrl/update_location"
         

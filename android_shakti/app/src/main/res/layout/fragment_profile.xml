@@ -4,13 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/life360_bg">
+    android:background="@color/bg_dark_primary">
 
-    <!-- Header Gradient -->
+    <!-- Header Gradient - Dark Red -->
     <View
         android:id="@+id/headerBg"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="200dp"
         android:background="@drawable/bg_gradient"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -27,16 +27,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Profile Card -->
+    <!-- Profile Card - Dark -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="24dp"
-        app:cardCornerRadius="24dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/bg_dark_card"
         app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -62,14 +62,15 @@
                         android:layout_width="100dp"
                         android:layout_height="100dp"
                         app:cardCornerRadius="50dp"
-                        app:cardElevation="4dp">
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="@color/bg_dark_surface">
                         <ImageView
                             android:id="@+id/imgProfile"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:src="@android:drawable/sym_def_app_icon"
                             android:scaleType="centerCrop"
-                            android:background="@color/life360_primary_light"/>
+                            android:background="@color/bg_dark_surface"/>
                     </androidx.cardview.widget.CardView>
 
                     <ImageButton
@@ -77,35 +78,36 @@
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:background="@drawable/bg_circle_white"
+                        android:backgroundTint="@color/shakti_red"
                         android:src="@android:drawable/ic_menu_camera"
                         android:elevation="6dp"
-                        app:tint="@color/shakti_brand_main"
+                        app:tint="@color/white"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Fields -->
+                <!-- Fields - Dark styled -->
                 <EditText
                     android:id="@+id/etName"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:hint="First Name"
-                    android:background="@drawable/bg_pill_white"
-                    android:backgroundTint="#F0F2F5"
+                    android:background="@color/bg_dark_surface"
                     android:paddingHorizontal="16dp"
                     android:layout_marginBottom="12dp"
-                    android:textColor="@color/life360_text_dark"/>
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_hint"/>
 
                 <EditText
                     android:id="@+id/etLastName"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:hint="Last Name"
-                    android:background="@drawable/bg_pill_white"
-                    android:backgroundTint="#F0F2F5"
+                    android:background="@color/bg_dark_surface"
                     android:paddingHorizontal="16dp"
                     android:layout_marginBottom="12dp"
-                    android:textColor="@color/life360_text_dark"/>
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_hint"/>
 
                 <EditText
                     android:id="@+id/etEmail"
@@ -113,38 +115,38 @@
                     android:layout_height="50dp"
                     android:hint="Email"
                     android:inputType="textEmailAddress"
-                    android:background="@drawable/bg_pill_white"
-                    android:backgroundTint="#F0F2F5"
+                    android:background="@color/bg_dark_surface"
                     android:paddingHorizontal="16dp"
                     android:layout_marginBottom="12dp"
-                    android:textColor="@color/life360_text_dark"/>
-                
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_hint"/>
+
                 <EditText
                     android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:hint="Phone Number"
                     android:inputType="phone"
-                    android:background="@drawable/bg_pill_white"
-                    android:backgroundTint="#F0F2F5"
+                    android:background="@color/bg_dark_surface"
                     android:paddingHorizontal="16dp"
                     android:layout_marginBottom="12dp"
-                    android:textColor="@color/life360_text_dark"/>
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_hint"/>
 
                 <EditText
                     android:id="@+id/etAddress"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:hint="Home Message / Address"
+                    android:hint="Home Address"
                     android:inputType="textMultiLine"
                     android:gravity="top|start"
-                    android:background="@drawable/bg_pill_white"
-                    android:backgroundTint="#F0F2F5"
+                    android:background="@color/bg_dark_surface"
                     android:padding="16dp"
                     android:layout_marginBottom="24dp"
-                    android:textColor="@color/life360_text_dark"/>
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/text_hint"/>
 
-                <!-- Save Button -->
+                <!-- Save Button - Red -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSave"
                     android:layout_width="match_parent"
@@ -152,17 +154,18 @@
                     android:text="Save Profile"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="@color/white"
                     app:cornerRadius="28dp"
-                    android:backgroundTint="@color/shakti_brand_main"
+                    android:backgroundTint="@color/shakti_red"
                     android:layout_marginBottom="12dp"/>
-                    
+
                 <!-- Logout Button -->
                 <TextView
                     android:id="@+id/btnLogout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Log Out"
-                    android:textColor="#FF0000"
+                    android:textColor="@color/shakti_red"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:padding="10dp"/>

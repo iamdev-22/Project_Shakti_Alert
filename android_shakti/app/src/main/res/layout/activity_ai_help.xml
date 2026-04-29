@@ -3,22 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FB">
+    android:background="@color/bg_dark_primary">
 
-    <!-- Header -->
+    <!-- Header - Dark Red -->
     <View
         android:id="@+id/headerBg"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="#6C63FF"
+        android:background="@color/bg_dark_secondary"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Shakti AI Assistant"
-        android:textColor="#FFFFFF"
+        android:text="🤖 Shakti AI Assistant"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginStart="16dp"
@@ -52,12 +52,12 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:visibility="gone"
-        android:indeterminateTint="#6C63FF"
+        android:indeterminateTint="@color/shakti_red"
         app:layout_constraintBottom_toTopOf="@+id/inputContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Input Area -->
+    <!-- Input Area - Dark -->
     <androidx.cardview.widget.CardView
         android:id="@+id/inputContainer"
         android:layout_width="match_parent"
@@ -65,6 +65,7 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/bg_dark_card"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
@@ -72,7 +73,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:padding="4dp"
-            android:background="#FFFFFF">
+            android:background="@color/bg_dark_card">
 
             <EditText
                 android:id="@+id/inputMessage"
@@ -82,7 +83,8 @@
                 android:hint="Ask for help..."
                 android:padding="16dp"
                 android:background="@null"
-                android:textColor="#333333"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_hint"
                 android:maxLines="4"
                 android:inputType="textCapSentences|textMultiLine" />
 
@@ -93,7 +95,7 @@
                 android:layout_gravity="center_vertical"
                 android:src="@android:drawable/ic_menu_send"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="#6C63FF"
+                app:tint="@color/shakti_red"
                 android:contentDescription="Send" />
 
         </LinearLayout>

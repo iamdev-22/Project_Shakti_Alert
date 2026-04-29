@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!-- ✅ Background location for continuous tracking (Like Zomato/Life360/Swiggy) -->
+    <!-- ✅ Background location for continuous tracking -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
@@ -17,6 +17,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <!-- ✅ Required for Android 14+ microphone foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <!-- ✅ Required for Android 14+ camera foreground service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
@@ -42,6 +46,11 @@
 
         <activity android:name=".MainActivity"
             android:exported="false" />
+
+        <!-- ✅ Setup onboarding flow -->
+        <activity android:name=".SetupActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ShaktiAlertApp" />
 
         <!-- Group Chat Activity -->
         <activity android:name=".GroupChatActivity"
@@ -70,7 +79,14 @@
             android:exported="false"
             android:foregroundServiceType="camera|microphone" />
 
-        <!-- ✅ NEW: Background Service - Keeps app alive even when screen off -->
+        <!-- ✅ SimpleAlertService - voice listening without media recording -->
+        <service
+            android:name=".SimpleAlertService"
+            android:exported="false"
+            android:enabled="true"
+            android:foregroundServiceType="location|microphone" />
+
+        <!-- ✅ Background Service - Keeps app alive even when screen off -->
         <service
             android:name=".ShaktiBackgroundService"
             android:enabled="true"

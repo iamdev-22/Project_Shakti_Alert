@@ -1,0 +1,302 @@
+================================================================================
+ALERT SYSTEM - TROUBLESHOOTING GUIDE (UPDATED)
+================================================================================
+
+ISSUE 1: Alerts Not Sending at All
+==================================
+
+Check these in order:
+
+1️⃣ Is WhatsApp server running?
+   Terminal command: netstat -an | findstr 3001
+   Expected: Should show listening on port 3001
+   Fix if missing: npm start (in wa_server folder)
+
+2️⃣ Are guardians configured?
+   File: shakti_alert/config.json
+   Should have:
+      {
+        "guardians": [
+          {"name": "Mom", "phone": "+919876543210"},
+          {"name": "Dad", "phone": "+919987654321"}
+        ]
+      }
+   Fix: Add guardians with correct format
+
+3️⃣ Check terminal output
+   When sending alert, should see:
+      ✅ Global cooldown removed - allows multiple help commands
+      ✅ All guards passed - Processing alert NOW
+      📱 LOADING GUARDIANS FROM CONFIG...
+      ✅ Loaded from config: 2 guardian(s)
+   
+   If missing: Something wrong with alert route
+
+4️⃣ Run debug script
+   Command: python DEBUG_ALERT_SYSTEM.py
+   Should show: All checks PASS
+   Fix: Follow recommendations from script
+
+
+ISSUE 2: Multiple Alerts Not Working (Still Blocked)
+=====================================================
+
+If you say HELP multiple times but only first sends:
+
+Check:
+
+1️⃣ Terminal shows cooldown message?
+   Message to see: "✅ Global cooldown removed - allows multiple help commands"
+   If missing: Code not updated properly
+   Fix: Verify app.py was modified correctly
+
+2️⃣ Are these same or different help commands?
+   Same command (duplicate):
+      └─ Terminal shows: "ALERT ALREADY SENT FOR THIS HELP COMMAND"
+      └─ This is EXPECTED - duplicate prevention
+   
+   Different commands:
+      └─ Terminal shows: "All guards passed - Processing alert NOW"
+      └─ Should both send
+
+3️⃣ Check alert token
+   Terminal shows: 📋 Token: [unique_token]
+   Same token = same command (duplicate)
+   Different token = different command (should send)
+
+4️⃣ Still not working?
+   Try: Restart Flask backend
+   Try: Clear PROCESSED_ALERTS data (temporary storage)
+   Run: python DEBUG_ALERT_SYSTEM.py
+
+
+ISSUE 3: Email Not Sending
+===========================
+
+Check each step:
+
+1️⃣ Did you configure email credentials?
+   Check .env file exists
+   Check has: GMAIL_USER=...
+   Check has: GMAIL_APP_PASSWORD=...
+   If missing: Add credentials to .env
+
+2️⃣ Is Flask restarted after adding credentials?
+   Changes to .env require restart
+   Stop Flask app
+   Start Flask app again
+   Test alert
+
+3️⃣ Terminal shows what about email?
+   Expected: [EMAIL] ✅ Sent to your-email@gmail.com
+   If shows: [EMAIL] ❌ No credentials found in .env
+      → Fix: Add GMAIL_USER to .env
+   If shows: [EMAIL] ❌ No recipient email address provided
+      → Fix: Recipient email is empty
+
+4️⃣ Check Gmail app password
+   Go: https://myaccount.google.com/security
+   Generate new app password
+   Update .env with new password
+   Restart Flask
+   Test
+
+5️⃣ Still not working?
+   Check Gmail security settings
+   Ensure 2FA enabled
+   Try: Turn off Gmail less secure settings
+   Try: Create new app password and update .env
+
+
+ISSUE 4: Duplicate Alerts Still Happening
+===========================================
+
+This is rare but here's how to check:
+
+1️⃣ Are you sending truly different help commands?
+   Alert 1: Time 0s, Token abc123
+   Alert 2: Time 5s, Token def456 (DIFFERENT TOKEN = OK to send both)
+   Alert 3: Time 8s, Token abc123 (SAME TOKEN = should be rejected)
+
+2️⃣ Check terminal shows:
+   For duplicate: "⚠️  ALERT ALREADY SENT FOR THIS HELP COMMAND!"
+   For new command: "✅ All guards passed - Processing alert NOW"
+
+3️⃣ Guardians receiving duplicates from single command?
+   This shouldn't happen
+   Check: Guardian list not duplicated in config.json
+   Check: send_whatsapp_text not called twice per guardian
+   Fix: Review config.json guardians section
+
+4️⃣ Multiple DIFFERENT commands causing spam?
+   This is: Normal behavior (feature, not bug)
+   To limit: Add frontend rate limiting
+   To limit: Add custom cooldown logic (contact support)
+
+
+ISSUE 5: Terminal Shows Error
+==============================
+
+Common errors and fixes:
+
+Error: "Connection refused on localhost:3001"
+   Cause: WhatsApp server not running
+   Fix: npm start (in wa_server folder)
+
+Error: "No guardians found!"
+   Cause: config.json missing guardians section
+   Fix: Add guardians to config.json with correct format
+
+Error: "HTTP 401/403"
+   Cause: WhatsApp server authentication failed
+   Fix: Check WhatsApp server credentials
+   Fix: Restart WhatsApp server
+
+Error: "[EMAIL] No credentials found"
+   Cause: GMAIL_USER not in .env
+   Fix: Add GMAIL_USER to .env
+   Fix: Restart Flask app
+
+Error: "JSON decode error"
+   Cause: WhatsApp server not responding properly
+   Fix: Restart WhatsApp server
+   Fix: Check server logs
+
+
+VERIFICATION STEPS
+==================
+
+Step 1: Verify code is updated
+   Open: shakti_alert/app.py
+   Search: "Global cooldown removed"
+   Should find: ✅ Loaded from config
+   Not found: Code not updated
+
+Step 2: Verify no syntax errors
+   Run: python -m py_compile shakti_alert/app.py
+   Output: Should be empty (no errors)
+
+Step 3: Test multiple alerts
+   Action: Say HELP at time 0s
+   Action: Say HELP at time 5s (DIFFERENT command)
+   Check: Both show in terminal
+   Check: Both send to guardians
+
+Step 4: Test email (if configured)
+   Check .env: GMAIL_USER exists
+   Restart: Flask app
+   Action: Trigger alert
+   Terminal: Should show "[EMAIL] ✅ Sent to..."
+   Check: Email received
+
+
+DEBUG SCRIPT
+============
+
+Run for complete diagnosis:
+   python DEBUG_ALERT_SYSTEM.py
+
+This tests:
+   ✅ Config file loads
+   ✅ Guardians configured
+   ✅ WhatsApp server running
+   ✅ Email credentials (if configured)
+   ✅ Alert sending capability
+
+Results:
+   All PASS ✅ → System ready
+   Any FAIL ❌ → Script suggests fix
+
+
+PERFORMANCE CHECKS
+==================
+
+System running slow after changes?
+
+Check:
+   ✅ WhatsApp server responsive (< 2 seconds)
+   ✅ No alerts stuck in processing
+   ✅ Terminal output clean (no spam)
+   ✅ Memory usage reasonable
+
+These changes should NOT cause slowdown
+If slow: Likely WhatsApp server issue
+
+
+SECURITY CHECKS
+===============
+
+After update, verify:
+
+✅ Email credentials not in code
+   Check: app.py doesn't have gmail password
+   Check: .env file exists (not in git)
+
+✅ Guardian phone numbers not logged
+   Check: Terminal doesn't show full phone
+   Check: Logs don't contain sensitive data
+
+✅ Alert tokens are temporary
+   Check: PROCESSED_ALERTS auto-clears
+   Check: No token stored permanently
+
+✅ No security regression
+   Check: Code still has guards
+   Check: Duplicate prevention works
+
+
+ROLLBACK INSTRUCTIONS
+======================
+
+If you need to go back to old version:
+
+1. Restore from backup
+   Or: Follow this to restore
+
+2. Restore cooldown:
+   After line: "if last_alert is not None:"
+   Add back: 20-second cooldown check
+
+3. Restore email always send:
+   Remove: Email credential checks
+   Result: Email always attempts send
+
+4. Restart Flask
+
+Note: Old version was restrictive
+New version is better - don't rollback unless critical
+
+
+NEXT STEPS FOR TROUBLESHOOTING
+================================
+
+If issue not listed above:
+
+1. Run DEBUG_ALERT_SYSTEM.py
+2. Check terminal output
+3. Read error messages carefully
+4. Try suggested fixes
+5. Restart Flask app
+6. Test alert again
+
+Most issues fixed by:
+   ├─ Restarting Flask
+   ├─ Restarting WhatsApp server
+   ├─ Adding missing config
+   └─ Verifying credentials
+
+
+CONTACT SUPPORT
+================
+
+When asking for help, provide:
+   1. Terminal output when alert triggered
+   2. Contents of config.json (without passwords)
+   3. Your .env file (without passwords)
+   4. What you expected vs what happened
+   5. Steps you already tried
+
+
+STATUS: TROUBLESHOOTING GUIDE COMPLETE
+
+================================================================================

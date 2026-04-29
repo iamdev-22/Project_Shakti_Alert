@@ -34,6 +34,14 @@ class HomeFragment : Fragment() {
                 "com.shakti.alert.STATUS" -> {
                     val status = intent.getStringExtra("status") ?: ""
                     tvStatus.text = "Status: $status"
+
+                    // Show red text if alert was sent
+                    if (status.contains("ALERT SENT", ignoreCase = true)) {
+                        tvStatus.setTextColor(android.graphics.Color.parseColor("#FF2020"))
+                    } else {
+                        tvStatus.setTextColor(android.graphics.Color.WHITE)
+                    }
+
                     updateVoiceAnimation(status)
                 }
             }
@@ -79,14 +87,19 @@ class HomeFragment : Fragment() {
         }
 
         btnStop.setOnClickListener {
+            // Stop listening AND reset alert lock
+            val stopSvc = Intent(requireContext(), SimpleAlertService::class.java).apply {
+                action = "STOP_LISTENING"
+            }
+            requireContext().startService(stopSvc)
+
             // Stop main alert service
-            val svc = Intent(requireContext(), AlertService::class.java)
-            requireContext().stopService(svc)
-            
-            // ✅ Stop background service
+            requireContext().stopService(Intent(requireContext(), AlertService::class.java))
+
+            // Stop background service
             ShaktiBackgroundService.stop(requireContext())
-            
-            tvStatus.text = "Status: System Stopped"
+
+            tvStatus.text = "Status: Stopped — Tap Start to reactivate"
             Toast.makeText(context, "Shakti Alert Stopped", Toast.LENGTH_SHORT).show()
             updateVoiceAnimation("stopped")
         }
@@ -144,6 +157,10 @@ class HomeFragment : Fragment() {
                     (dotSize * resources.displayMetrics.density).toInt()
                 )
                 setBackgroundResource(R.drawable.dot_white)
+                // Tint red for dark theme
+                backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    android.graphics.Color.parseColor("#FF2020")
+                )
                 alpha = 0.6f
                 scaleX = 0.8f
                 scaleY = 0.8f
@@ -241,7 +258,7 @@ class HomeFragment : Fragment() {
     
     private fun updateVoiceAnimation(status: String) {
         try {
-            val s = status.toLowerCase()
+            val s = status.lowercase()
             when {
                 s.contains("help") || s.contains("detected") || s.contains("emergency") -> {
                     if (!isAnimating) startWaveAnimation()

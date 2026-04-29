@@ -3,11 +3,14 @@ package com.shakti.alert.service
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.camera2.*
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.example.shaktialert.R
 import io.socket.client.IO
@@ -23,6 +26,7 @@ import java.net.URISyntaxException
 class LiveStreamService : Service() {
 
     companion object {
+        private const val TAG = "LiveStreamService"
         const val CHANNEL_ID = "LiveStreamChannel"
         const val NOTIFICATION_ID = 1001
         const val ACTION_START_STREAM = "START_STREAM"
@@ -66,7 +70,13 @@ class LiveStreamService : Service() {
                 serverUrl = intent.getStringExtra(EXTRA_SERVER_URL) ?: serverUrl
                 userId = intent.getStringExtra(EXTRA_USER_ID) ?: userId
                 startForegroundService()
-                startStreaming()
+                if (hasStreamPermissions()) {
+                    startStreaming()
+                } else {
+                    updateNotification("❌ Missing camera/mic permission")
+                    Log.e(TAG, "Missing permissions for camera/microphone")
+                    stopSelf()
+                }
             }
             ACTION_STOP_STREAM -> {
                 stopStreaming()
@@ -156,6 +166,7 @@ class LiveStreamService : Service() {
             
         } catch (e: Exception) {
             e.printStackTrace()
+            Log.e(TAG, "Stream failed: ${e.message}")
             updateNotification("❌ Stream Failed: ${e.message}")
         }
     }
@@ -255,33 +266,47 @@ class LiveStreamService : Service() {
     }
 
     private fun startCameraCapture() {
-        // Use Camera2 API for background capture (works with screen OFF)
-        val camera2Enumerator = Camera2Enumerator(this)
-        val deviceNames = camera2Enumerator.deviceNames
-        
-        // Find back camera
-        val backCameraName = deviceNames.firstOrNull { 
-            camera2Enumerator.isBackFacing(it) 
-        } ?: deviceNames.firstOrNull()
-        
-        backCameraName?.let { cameraName ->
-            videoCapturer = camera2Enumerator.createCapturer(cameraName, null)
-            
+        val enumerator: CameraEnumerator = if (Camera2Enumerator.isSupported(this)) {
+            Camera2Enumerator(this)
+        } else {
+            Camera1Enumerator(false)
+        }
+
+        val deviceNames = enumerator.deviceNames
+        val backCameraName = deviceNames.firstOrNull { enumerator.isBackFacing(it) }
+            ?: deviceNames.firstOrNull()
+
+        if (backCameraName == null) {
+            Log.e(TAG, "No camera device found")
+            updateNotification("❌ No camera found")
+            return
+        }
+
+        try {
+            videoCapturer = enumerator.createCapturer(backCameraName, null)
+
             val surfaceTextureHelper = SurfaceTextureHelper.create(
                 "CaptureThread",
                 EglBase.create().eglBaseContext
             )
-            
+
             val videoSource = peerConnectionFactory?.createVideoSource(false)
             videoCapturer?.initialize(surfaceTextureHelper, this, videoSource?.capturerObserver)
             videoCapturer?.startCapture(640, 480, 30)
-            
+
             localVideoTrack = peerConnectionFactory?.createVideoTrack("video", videoSource)
             peerConnection?.addTrack(localVideoTrack)
+        } catch (e: Exception) {
+            Log.e(TAG, "Camera start failed: ${e.message}")
+            updateNotification("❌ Camera start failed")
         }
     }
 
     private fun startAudioCapture() {
+        if (!hasStreamPermissions()) {
+            Log.e(TAG, "Missing mic permission for audio capture")
+            return
+        }
         val audioConstraints = MediaConstraints().apply {
             mandatory.add(MediaConstraints.KeyValuePair("googEchoCancellation", "true"))
             mandatory.add(MediaConstraints.KeyValuePair("googNoiseSuppression", "true"))
@@ -309,9 +334,13 @@ class LiveStreamService : Service() {
     }
 
     private fun stopStreaming() {
-        socket?.emit("stop_stream", org.json.JSONObject().apply {
-            put("user_id", userId)
-        })
+        try {
+            socket?.emit("stop_stream", org.json.JSONObject().apply {
+                put("user_id", userId)
+            })
+        } catch (e: Exception) {
+            Log.e(TAG, "Stop stream emit failed: ${e.message}")
+        }
         
         videoCapturer?.stopCapture()
         videoCapturer?.dispose()
@@ -339,6 +368,14 @@ class LiveStreamService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopStreaming()
+    }
+
+    private fun hasStreamPermissions(): Boolean {
+        val cameraOk = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) ==
+            PackageManager.PERMISSION_GRANTED
+        val micOk = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO) ==
+            PackageManager.PERMISSION_GRANTED
+        return cameraOk && micOk
     }
 
     // Simple SDP Observer

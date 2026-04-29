@@ -33,7 +33,19 @@ class CirclesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_circles, container, false)
-        
+
+        // ✅ FIX: Check login before doing anything
+        val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("auth_token", "") ?: ""
+        if (token.isEmpty()) {
+            Toast.makeText(requireContext(),
+                "⚠️ Please login first to use Circles",
+                Toast.LENGTH_LONG).show()
+            // Redirect to login
+            startActivity(android.content.Intent(requireContext(), LoginActivity::class.java))
+            return view
+        }
+
         // Initialize RecyclerView
         recyclerView = view.findViewById(R.id.recyclerCircles)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -55,26 +67,26 @@ class CirclesFragment : Fragment() {
             }
         )
         recyclerView.adapter = circlesAdapter
-        
+
         // Create Circle button
         view.findViewById<Button>(R.id.btnCreateCircle).setOnClickListener {
             showCreateCircleDialog()
         }
-        
+
         // Join Circle button
         view.findViewById<Button>(R.id.btnJoinCircle).setOnClickListener {
             showJoinCircleDialog()
         }
-        
+
         // Load circles
         loadCircles()
-        
+
         return view
     }
     
     private fun loadCircles() {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -143,7 +155,7 @@ class CirclesFragment : Fragment() {
     
     private fun createCircle(name: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"name": "$name"}"""
@@ -221,7 +233,7 @@ class CirclesFragment : Fragment() {
     
     private fun joinCircle(inviteCode: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"invite_code": "$inviteCode"}"""
@@ -263,7 +275,7 @@ class CirclesFragment : Fragment() {
     
     private fun deleteCircle(circleId: Int) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()

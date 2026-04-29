@@ -1,13 +1,62 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- ✅ Material Components Theme (Required for new UI) -->
-    <style name="Theme.ShaktiAlertApp" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryDark">@color/purple_700</item>
-        <item name="colorAccent">@android:color/white</item>
-        <item name="android:statusBarColor">@color/purple_700</item>
+
+    <!-- ===== MAIN DARK BLACK THEME ===== -->
+    <style name="Theme.ShaktiAlertApp" parent="Theme.MaterialComponents.NoActionBar">
+
+        <!-- Red Primary Colors -->
+        <item name="colorPrimary">@color/shakti_red</item>
+        <item name="colorPrimaryVariant">@color/shakti_red_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Secondary (also red) -->
+        <item name="colorSecondary">@color/shakti_red</item>
+        <item name="colorSecondaryVariant">@color/shakti_red_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Black Backgrounds -->
+        <item name="android:windowBackground">@color/bg_dark_primary</item>
+        <item name="colorSurface">@color/bg_dark_card</item>
+        <item name="colorOnSurface">@color/white</item>
+
+        <!-- Status Bar and Nav Bar - Pure Black -->
+        <item name="android:statusBarColor">@color/bg_dark_primary</item>
+        <item name="android:navigationBarColor">@color/bg_dark_primary</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+
+        <!-- EditText tint (cursor + underline) -->
+        <item name="colorControlActivated">@color/shakti_red</item>
+        <item name="colorControlHighlight">@color/shakti_red_dim</item>
+
+        <!-- Switch thumb and track -->
+        <item name="colorAccent">@color/shakti_red</item>
+
+        <!-- Dialog backgrounds -->
+        <item name="dialogTheme">@style/ShaktiDialog</item>
+        <item name="alertDialogTheme">@style/ShaktiDialog</item>
     </style>
-    
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+
+    <!-- Also keep AppTheme as alias -->
+    <style name="AppTheme" parent="Theme.ShaktiAlertApp" />
+
+    <!-- Dialog Style - Dark -->
+    <style name="ShaktiDialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@color/bg_dark_card</item>
+        <item name="colorSurface">@color/bg_dark_card</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorPrimary">@color/shakti_red</item>
+        <item name="buttonBarPositiveButtonStyle">@style/RedButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GrayButtonStyle</item>
     </style>
+
+    <!-- Red Button Style -->
+    <style name="RedButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/shakti_red</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <!-- Gray/Transparent Button Style -->
+    <style name="GrayButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
 </resources>

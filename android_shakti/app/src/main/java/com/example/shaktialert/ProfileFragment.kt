@@ -80,7 +80,7 @@ class ProfileFragment : Fragment() {
         
         btnLogout.setOnClickListener {
             // Call logout API
-            val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+            val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
             val token = prefs.getString("auth_token", "") ?: ""
             
             val client = okhttp3.OkHttpClient()

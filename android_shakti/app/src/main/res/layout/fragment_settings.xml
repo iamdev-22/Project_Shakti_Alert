@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="@color/white">
+    android:background="@color/bg_dark_primary">
 
     <!-- ScrollView to handle long content -->
     <ScrollView
@@ -30,7 +30,7 @@
                 android:text="Settings"
                 android:textSize="28sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/white"
                 android:layout_marginBottom="24dp"/>
 
             <!-- SERVER URL SECTION -->
@@ -40,7 +40,7 @@
                 android:text="Server Connection"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/shakti_red"
                 android:layout_marginBottom="12dp"
                 android:layout_marginTop="12dp"/>
 
@@ -50,9 +50,9 @@
                 android:layout_height="50dp"
                 android:hint="http://192.168.1.35:5000"
                 android:paddingHorizontal="16dp"
-                android:background="@color/life360_bg"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
+                android:background="@color/bg_dark_surface"
+                android:textColor="@color/white"
+                android:textColorHint="@color/text_hint"
                 android:inputType="textUri"
                 android:layout_marginBottom="12dp"/>
 
@@ -63,8 +63,9 @@
                 android:text="Save Connection Settings"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="@color/white"
                 app:cornerRadius="8dp"
-                android:backgroundTint="@color/shakti_brand_main"
+                android:backgroundTint="@color/shakti_red"
                 android:layout_marginBottom="32dp"/>
 
             <!-- DARK MODE SECTION -->
@@ -74,7 +75,7 @@
                 android:text="Appearance"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/shakti_red"
                 android:layout_marginBottom="12dp"
                 android:layout_marginTop="12dp"/>
 
@@ -82,12 +83,12 @@
                 android:id="@+id/switchDarkMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dark Mode"
+                android:text="Dark Mode (Always On)"
                 android:textSize="16sp"
-                android:checked="false"
+                android:checked="true"
                 android:padding="12dp"
-                android:background="@color/life360_bg"
-                android:textColor="@color/text_primary"
+                android:background="@color/bg_dark_card"
+                android:textColor="@color/white"
                 android:layout_marginBottom="12dp"/>
 
             <!-- NOTIFICATIONS SECTION -->
@@ -97,7 +98,7 @@
                 android:text="Notifications &amp; Permissions"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/shakti_red"
                 android:layout_marginBottom="12dp"
                 android:layout_marginTop="16dp"/>
 
@@ -109,8 +110,8 @@
                 android:textSize="16sp"
                 android:checked="true"
                 android:padding="12dp"
-                android:background="@color/life360_bg"
-                android:textColor="@color/text_primary"
+                android:background="@color/bg_dark_card"
+                android:textColor="@color/white"
                 android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -121,8 +122,8 @@
                 android:textSize="16sp"
                 android:checked="true"
                 android:padding="12dp"
-                android:background="@color/life360_bg"
-                android:textColor="@color/text_primary"
+                android:background="@color/bg_dark_card"
+                android:textColor="@color/white"
                 android:layout_marginBottom="12dp"/>
 
             <!-- SOS COUNTDOWN SECTION -->
@@ -132,7 +133,7 @@
                 android:text="SOS Countdown Duration"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/shakti_red"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"/>
 
@@ -153,7 +154,7 @@
                 android:text="About"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/shakti_red"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"/>
 

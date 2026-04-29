@@ -115,14 +115,25 @@ class WhatsAppFragmentNative : Fragment() {
         qrCheckJob?.cancel()
     }
     
+    // Helper: get WhatsApp server URL (PC IP + port 3001)
+    private fun getWaServerUrl(): String {
+        val prefs = requireContext().getSharedPreferences("shakti_prefs", android.content.Context.MODE_PRIVATE)
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
+        return try {
+            val uri = android.net.Uri.parse(serverUrl)
+            "http://${uri.host ?: "192.168.29.91"}:3001"
+        } catch (e: Exception) {
+            "http://192.168.29.91:3001"
+        }
+    }
+
     private suspend fun checkQRCode() = withContext(Dispatchers.IO) {
         try {
-            val prefs = requireContext().getSharedPreferences("shakti_prefs", android.content.Context.MODE_PRIVATE)
-            val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
-            
-            // Connect through Flask backend API (better than direct server connection)
+            val waUrl = getWaServerUrl()
+
+            // Hit WhatsApp server status directly
             val request = Request.Builder()
-                .url("$serverUrl/api/whatsapp/qr")
+                .url("$waUrl/status")
                 .build()
             
             val response = client.newCall(request).execute()
@@ -133,8 +144,9 @@ class WhatsAppFragmentNative : Fragment() {
                     try {
                         val json = JSONObject(responseBody)
                         val status = json.optString("status", "")
-                        val qrData = json.optString("qr", "") + json.optString("qrCode", "") // Check both keys
-                        
+                        // WhatsApp server returns qrCode directly
+                        val qrData = json.optString("qrCode", "").ifEmpty { json.optString("qr", "") }
+
                         when (status) {
                             "connected" -> {
                                 qrProgressBar.visibility = View.GONE
@@ -157,14 +169,14 @@ class WhatsAppFragmentNative : Fragment() {
                                     statusText.text = "⏳ Please wait..."
                                 }
                             }
-                            "loading" -> {
+                            "loading", "initializing", "reconnecting" -> {
                                 qrProgressBar.visibility = View.VISIBLE
                                 qrCodeImage.visibility = View.GONE
-                                qrStatusText.text = "Generating QR code..."
+                                qrStatusText.text = "⏳ ${json.optString("details", "Initializing...")}"
                                 statusText.text = "⏳ Initializing WhatsApp connection..."
                             }
                             else -> {
-                                val message = json.optString("message", "Unknown error")
+                                val message = json.optString("details", json.optString("message", "Unknown status"))
                                 qrStatusText.text = "⏳ $message"
                                 statusText.text = "⏳ $message"
                                 statusText.setTextColor(resources.getColor(android.R.color.holo_orange_dark))
@@ -210,19 +222,17 @@ class WhatsAppFragmentNative : Fragment() {
     private fun refreshQR() {
         scope.launch {
             try {
+                val waUrl = getWaServerUrl()
                 withContext(Dispatchers.IO) {
                     val request = Request.Builder()
-                        .url("http://127.0.0.1:3001/reset")
+                        .url("$waUrl/reset")
                         .post(RequestBody.create(null, ""))
                         .build()
-                    
                     client.newCall(request).execute()
                 }
-                
                 qrProgressBar.visibility = View.VISIBLE
                 qrCodeImage.visibility = View.GONE
                 qrStatusText.text = "Refreshing QR code..."
-                
                 delay(2000)
                 checkQRCode()
             } catch (e: Exception) {
@@ -234,15 +244,14 @@ class WhatsAppFragmentNative : Fragment() {
     private fun disconnect() {
         scope.launch {
             try {
+                val waUrl = getWaServerUrl()
                 withContext(Dispatchers.IO) {
                     val request = Request.Builder()
-                        .url("http://127.0.0.1:3001/reset")
+                        .url("$waUrl/reset")
                         .post(RequestBody.create(null, ""))
                         .build()
-                    
                     client.newCall(request).execute()
                 }
-                
                 Toast.makeText(context, "WhatsApp disconnected", Toast.LENGTH_SHORT).show()
                 qrStatusText.text = "Disconnected. Refresh to reconnect."
             } catch (e: Exception) {

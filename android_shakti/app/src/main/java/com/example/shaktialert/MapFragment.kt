@@ -190,7 +190,7 @@ class MapFragment : Fragment() {
         fun onLogoutClicked() {
             activity?.runOnUiThread {
                 val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-                val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+                val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
                 val token = prefs.getString("auth_token", "") ?: ""
                 
                 // Call logout API
@@ -234,7 +234,7 @@ class MapFragment : Fragment() {
         fun onCreateCircle(circleName: String) {
             activity?.runOnUiThread {
                 val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-                val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+                val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
                 val token = prefs.getString("auth_token", "") ?: ""
                 
                 if (token.isEmpty()) {
@@ -251,7 +251,7 @@ class MapFragment : Fragment() {
         fun onJoinCircle(inviteCode: String) {
             activity?.runOnUiThread {
                 val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-                val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+                val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
                 val token = prefs.getString("auth_token", "") ?: ""
                 
                 if (token.isEmpty()) {
@@ -606,7 +606,7 @@ class MapFragment : Fragment() {
     
     private fun sendLocationToServer(lat: Double, lon: Double) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         // Get battery level
@@ -639,7 +639,7 @@ class MapFragment : Fragment() {
     
     private fun loadCircleMembersForMap(webView: WebView) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -672,7 +672,7 @@ class MapFragment : Fragment() {
     
     private fun loadMembersLocations(webView: WebView, circleId: Int) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         Log.d("MapFragment", "Loading members for circle: $circleId")

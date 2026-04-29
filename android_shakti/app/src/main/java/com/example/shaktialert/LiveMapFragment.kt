@@ -263,7 +263,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
 
     private fun sendLocationToServer(lat: Double, lon: Double) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = JSONObject()
@@ -297,7 +297,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
 
     private fun loadUserCircles() {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -341,7 +341,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         if (currentCircleId == 0) return
         
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -440,7 +440,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
 
     private fun createCircle(name: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
 
         if (token.isEmpty()) {
@@ -535,7 +535,7 @@ class LiveMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
 
     private fun joinCircle(inviteCode: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
 
         val json = JSONObject()

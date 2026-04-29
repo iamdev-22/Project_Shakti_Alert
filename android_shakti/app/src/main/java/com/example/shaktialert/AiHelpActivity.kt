@@ -87,7 +87,7 @@ class AiHelpActivity : AppCompatActivity() {
 
     private suspend fun getAiResponse(message: String): String = withContext(Dispatchers.IO) {
         val prefs = getSharedPreferences("shakti_prefs", MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         
         val json = JSONObject().apply {
             put("message", message)

@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -22,13 +23,20 @@ class LoginActivity : AppCompatActivity() {
     private val client = OkHttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // ✅ Force dark mode ALWAYS - black theme
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         // Check if already logged in
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        if (prefs.contains("auth_token")) {
-            startActivity(Intent(this, MainActivity::class.java))
+        if (prefs.contains("auth_token") && prefs.getString("auth_token", "").orEmpty().isNotEmpty()) {
+            // Already logged in — check if setup is complete
+            if (SetupManager.isFullySetup(this)) {
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                SetupActivity.start(this)
+            }
             finish()
             return
         }
@@ -46,7 +54,7 @@ class LoginActivity : AppCompatActivity() {
         val etServerUrl = findViewById<EditText>(R.id.etServerUrl)
 
         // Pre-fill server URL if saved, otherwise default to local network IP
-        etServerUrl.setText(prefs.getString("server_url", "http://192.168.1.35:5000"))
+        etServerUrl.setText(prefs.getString("server_url", "http://192.168.29.91:5000"))
 
 
         // Toggle Logic
@@ -137,21 +145,30 @@ class LoginActivity : AppCompatActivity() {
                             if (jsonResp.optBoolean("success")) {
                                 val token = jsonResp.optString("token")
                                 val userObj = jsonResp.optJSONObject("user")
-                                
+
+                                // ✅ FIX: Call onUserLogin FIRST — clears old user data if different user
+                                val newUserId = userObj?.optInt("id") ?: -1
+                                SetupManager.onUserLogin(this@LoginActivity, newUserId, email)
+
                                 // Save user data from login response
                                 val editor = prefs.edit()
                                 editor.putString("auth_token", token)
                                 editor.putString("user_email", email)
-                                
+
                                 if (userObj != null) {
                                     editor.putInt("user_id", userObj.optInt("id"))
                                     editor.putString("user_name", userObj.optString("name", ""))
                                     editor.putString("user_last_name", userObj.optString("last_name", ""))
                                 }
                                 editor.apply()
-                                
+
                                 Toast.makeText(this@LoginActivity, "Welcome!", Toast.LENGTH_SHORT).show()
-                                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                                // ✅ Go to setup if not fully setup, otherwise main
+                                if (SetupManager.isFullySetup(this@LoginActivity)) {
+                                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                                } else {
+                                    SetupActivity.start(this@LoginActivity)
+                                }
                                 finish()
                             } else {
                                 val err = jsonResp.optString("error", "Authentication failed")
@@ -175,9 +192,8 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
 
-        btnSkip.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
+        // Skip button — DISABLED. Setup is mandatory for safety.
+        // btnSkip hidden but kept to avoid layout crash
+        try { btnSkip.visibility = View.GONE } catch (e: Exception) {}
     }
 }

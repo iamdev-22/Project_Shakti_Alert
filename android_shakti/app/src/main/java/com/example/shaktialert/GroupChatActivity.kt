@@ -100,7 +100,7 @@ class GroupChatActivity : AppCompatActivity() {
     
     private fun loadMessages() {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -152,7 +152,7 @@ class GroupChatActivity : AppCompatActivity() {
     
     private fun sendMessage(message: String) {
         val prefs = getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"message": "$message"}"""

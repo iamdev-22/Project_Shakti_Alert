@@ -42,13 +42,16 @@ class SettingsFragment : Fragment() {
             // ===== LOAD SAVED SETTINGS =====
             
             // Load Server URL
-            val savedUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+            val savedUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
             etServerUrl.setText(savedUrl)
             Log.i(TAG, "Loaded server URL: $savedUrl")
             
-            // Load Dark Mode
-            val isDarkMode = prefs.getBoolean("dark_mode", false)
+            // Load Dark Mode - ALWAYS ON (App is black theme)
+            val isDarkMode = prefs.getBoolean("dark_mode", true)
             switchDarkMode.isChecked = isDarkMode
+            // Ensure dark mode is set
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            prefs.edit().putBoolean("dark_mode", true).apply()
             Log.i(TAG, "Loaded dark mode: $isDarkMode")
             
             // Load Notifications

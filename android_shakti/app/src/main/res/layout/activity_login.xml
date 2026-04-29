@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
+    android:background="@color/bg_dark_primary"
     android:padding="24dp">
 
     <!-- Logo/Title -->
@@ -33,7 +33,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- Form Card -->
+    <!-- Form Card - Dark -->
     <LinearLayout
         android:id="@+id/cardForm"
         android:layout_width="match_parent"
@@ -46,11 +46,10 @@
         app:layout_constraintVertical_bias="0.5">
 
         <!-- Toggle Login/Signup -->
-        <!-- Toggle Login/Signup -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#80000000"
+            android:background="@color/bg_dark_surface"
             android:orientation="horizontal"
             android:padding="4dp"
             android:layout_marginBottom="24dp">
@@ -89,22 +88,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:background="@drawable/card_glass"
+                android:background="@color/bg_dark_surface"
                 android:hint="First Name"
                 android:padding="16dp"
                 android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary" />
+                android:textColorHint="@color/text_hint" />
 
             <EditText
                 android:id="@+id/etLastName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:background="@drawable/card_glass"
+                android:background="@color/bg_dark_surface"
                 android:hint="Last Name"
                 android:padding="16dp"
                 android:textColor="@color/white"
-                android:textColorHint="@color/text_secondary" />
+                android:textColorHint="@color/text_hint" />
         </LinearLayout>
 
         <EditText
@@ -112,47 +111,49 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/card_glass"
+            android:background="@color/bg_dark_surface"
             android:hint="Email"
             android:inputType="textEmailAddress"
             android:padding="16dp"
             android:textColor="@color/white"
-            android:textColorHint="@color/text_secondary" />
+            android:textColorHint="@color/text_hint" />
 
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:background="@drawable/card_glass"
+            android:background="@color/bg_dark_surface"
             android:hint="Password"
             android:inputType="textPassword"
             android:padding="16dp"
             android:textColor="@color/white"
-            android:textColorHint="@color/text_secondary" />
+            android:textColorHint="@color/text_hint" />
 
         <EditText
             android:id="@+id/etServerUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:background="@drawable/card_glass"
+            android:background="@color/bg_dark_surface"
             android:hint="Server URL (e.g. http://192.168.1.5:5000)"
             android:inputType="textUri"
             android:text="http://10.0.2.2:5000"
             android:padding="16dp"
             android:textColor="@color/white"
-            android:textColorHint="@color/text_secondary" />
+            android:textColorHint="@color/text_hint" />
 
+        <!-- Login/Signup Action Button - Red -->
         <Button
             android:id="@+id/btnAction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/shakti_red"
-            android:padding="12dp"
+            android:padding="14dp"
             android:text="Login"
             android:textColor="@color/white"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="16sp" />
 
         <!-- Forgot Password Link -->
         <TextView

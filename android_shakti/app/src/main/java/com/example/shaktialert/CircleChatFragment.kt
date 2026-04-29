@@ -116,7 +116,7 @@ class CircleChatFragment : Fragment() {
     
     private fun fetchMembers(recyclerView: RecyclerView, progressBar: ProgressBar) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -172,7 +172,7 @@ class CircleChatFragment : Fragment() {
     
     private fun loadMessages() {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -224,7 +224,7 @@ class CircleChatFragment : Fragment() {
     
     private fun sendMessage(message: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"message": "$message"}"""

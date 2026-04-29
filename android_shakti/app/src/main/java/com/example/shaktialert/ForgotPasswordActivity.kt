@@ -112,7 +112,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
     
     private fun requestResetCode(email: String) {
         val prefs = getSharedPreferences("shakti_prefs", MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         
         val json = JSONObject()
         json.put("email", email)
@@ -189,7 +189,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
     
     private fun verifyCodeWithBackend(email: String, code: String) {
         val prefs = getSharedPreferences("shakti_prefs", MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         
         val json = JSONObject()
         json.put("email", email)
@@ -238,7 +238,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
     
     private fun resetPassword(email: String, code: String, newPassword: String) {
         val prefs = getSharedPreferences("shakti_prefs", MODE_PRIVATE)
-        val serverUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: "http://192.168.1.35:5000"
+        val serverUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: "http://192.168.29.91:5000"
         
         val json = JSONObject()
         json.put("email", email)

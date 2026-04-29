@@ -1,9 +1,13 @@
 package com.example.shaktialert
 
+import android.content.Context
 import android.content.pm.PackageManager
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -14,7 +18,22 @@ class MainActivity : AppCompatActivity() {
     private var currentFragmentTag = "HOME"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // ✅ Force dark mode ALWAYS - black theme
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         super.onCreate(savedInstanceState)
+
+        // ✅ FIX: Check login & setup before showing main UI
+        if (!SetupManager.isLoggedIn(this)) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+        if (!SetupManager.isFullySetup(this)) {
+            SetupActivity.start(this)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         ensurePermissions()
@@ -51,6 +70,17 @@ class MainActivity : AppCompatActivity() {
         })
 
         bottomNav.setOnItemSelectedListener { item ->
+            // Gate features that require setup
+            val gated = when (item.itemId) {
+                R.id.nav_contacts -> !SetupManager.isGuardianDone(this)
+                else -> false
+            }
+            if (gated) {
+                Toast.makeText(this, "⚠️ Complete setup first. Tap to continue.", Toast.LENGTH_LONG).show()
+                SetupActivity.start(this)
+                return@setOnItemSelectedListener false
+            }
+
             // Prevent re-selecting the same fragment
             if (currentFragmentTag == item.itemId.toString()) {
                 return@setOnItemSelectedListener true
@@ -112,7 +142,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadUserProfile() {
         val prefs = getSharedPreferences("shakti_prefs", MODE_PRIVATE)
         val token = prefs.getString("auth_token", "") ?: return
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         
         if (token.isEmpty()) return
         

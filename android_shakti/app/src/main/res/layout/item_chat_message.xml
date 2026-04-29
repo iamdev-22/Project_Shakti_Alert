@@ -39,7 +39,7 @@
                 android:text="John Doe"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#1F2937" />
+                android:textColor="@color/white" />
 
             <TextView
                 android:id="@+id/tvTimestamp"
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:text="10:30"
                 android:textSize="12sp"
-                android:textColor="#9CA3AF" />
+                android:textColor="@color/text_secondary" />
 
         </LinearLayout>
 
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:text="Hello everyone!"
             android:textSize="15sp"
-            android:textColor="#374151"
+            android:textColor="@color/white"
             android:layout_marginTop="4dp"
             android:background="@drawable/message_bubble_background"
             android:padding="12dp" />

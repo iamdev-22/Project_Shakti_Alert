@@ -235,7 +235,7 @@ class EnhancedLocationFragment : Fragment(), OnMapReadyCallback, LocationListene
 
     private fun loadUserCircles() {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -279,7 +279,7 @@ class EnhancedLocationFragment : Fragment(), OnMapReadyCallback, LocationListene
         if (currentCircleId == 0) return
         
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val request = Request.Builder()
@@ -371,7 +371,7 @@ class EnhancedLocationFragment : Fragment(), OnMapReadyCallback, LocationListene
 
     private fun createCircle(name: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"name": "$name"}"""
@@ -443,7 +443,7 @@ class EnhancedLocationFragment : Fragment(), OnMapReadyCallback, LocationListene
 
     private fun joinCircle(inviteCode: String) {
         val prefs = requireContext().getSharedPreferences("shakti_prefs", Context.MODE_PRIVATE)
-        val baseUrl = prefs.getString("server_url", "http://192.168.1.35:5000") ?: return
+        val baseUrl = prefs.getString("server_url", "http://192.168.29.91:5000") ?: return
         val token = prefs.getString("auth_token", "") ?: return
         
         val json = """{"invite_code": "$inviteCode"}"""

@@ -1,44 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Legacy purple name mappings → now all RED for Shakti theme -->
     <color name="purple_200">#FF6B6B</color>
-    <color name="purple_500">#FF2E2E</color>
-    <color name="purple_700">#D50000</color>
-    <color name="teal_200">#FF2E2E</color>
-    <color name="teal_700">#B71C1c</color>
+    <color name="purple_500">#FF2020</color>
+    <color name="purple_700">#CC0000</color>
+    <color name="teal_200">#FF2020</color>
+    <color name="teal_700">#CC0000</color>
+
+    <!-- System Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    
-    <!-- Brand Colors -->
-    <color name="shakti_brand_main">#FF2E2E</color>
-    <color name="shakti_brand_dark">#D50000</color>
-    <color name="shakti_brand_light">#FF6B6B</color>
-    
-    <!-- Life360 Style Mapped to Red -->
-    <color name="life360_primary">#FF2E2E</color>
-    <color name="life360_primary_light">#FFF0F0</color>
-    <color name="life360_secondary">#FF5252</color>
-    <color name="life360_bg">#F8F9FA</color>
-    <color name="life360_text_dark">#1f2937</color>
-    <color name="life360_text_gray">#6b7280</color>
-    <color name="life360_danger">#FF2E2E</color>
-    <color name="life360_success">#10b981</color>
-    
-    <!-- Existing App Colors Mapped -->
-    <color name="shakti_black">#1c1c1e</color>
-    <color name="shakti_red">#FF2E2E</color>
-    <color name="text_primary">#1f2937</color>
-    <color name="text_secondary">#757575</color>
-    <color name="divider">#E0E0E0</color>
-    
-    <!-- Legacy Colors -->
-    <color name="shakti_btn_start">#FF2E2E</color>
-    <color name="shakti_btn_end">#D50000</color>
-    <color name="shakti_red_dark">#b71c1c</color>
-    <color name="glass_bg">#22ffffff</color>
-    <color name="glass_border">#33ffffff</color>
-    
-    <!-- Gradient Colors -->
-    <color name="shakti_gradient_start">#FF2E2E</color>
-    <color name="shakti_gradient_mid">#FF5252</color>
-    <color name="shakti_gradient_end">#FF8A80</color>
+
+    <!-- ===== BLACK DARK THEME COLORS ===== -->
+    <!-- Backgrounds -->
+    <color name="bg_dark_primary">#000000</color>
+    <color name="bg_dark_secondary">#0D0D0D</color>
+    <color name="bg_dark_card">#111111</color>
+    <color name="bg_dark_surface">#1A1A1A</color>
+    <color name="bg_dark_elevated">#222222</color>
+
+    <!-- Red Accent Colors -->
+    <color name="shakti_red">#FF2020</color>
+    <color name="shakti_red_dark">#CC0000</color>
+    <color name="shakti_red_light">#FF5555</color>
+    <color name="shakti_red_dim">#80FF2020</color>
+
+    <!-- Brand Colors (all red) -->
+    <color name="shakti_brand_main">#FF2020</color>
+    <color name="shakti_brand_dark">#CC0000</color>
+    <color name="shakti_brand_light">#FF5555</color>
+
+    <!-- Life360-style mapped to dark+red -->
+    <color name="life360_primary">#FF2020</color>
+    <color name="life360_primary_light">#2A0000</color>
+    <color name="life360_secondary">#FF5555</color>
+    <color name="life360_bg">#111111</color>
+    <color name="life360_text_dark">#FFFFFF</color>
+    <color name="life360_text_gray">#AAAAAA</color>
+    <color name="life360_danger">#FF2020</color>
+    <color name="life360_success">#00CC66</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AAAAAA</color>
+    <color name="text_hint">#666666</color>
+
+    <!-- Divider / Glass -->
+    <color name="divider">#2A2A2A</color>
+    <color name="glass_bg">#1AFF2020</color>
+    <color name="glass_border">#33FF2020</color>
+
+    <!-- Gradient Colors (dark red gradient) -->
+    <color name="shakti_gradient_start">#1A0000</color>
+    <color name="shakti_gradient_mid">#330000</color>
+    <color name="shakti_gradient_end">#000000</color>
+
+    <!-- Button Colors -->
+    <color name="shakti_btn_start">#FF2020</color>
+    <color name="shakti_btn_end">#CC0000</color>
+
+    <!-- Additional -->
+    <color name="shakti_black">#000000</color>
+    <color name="shakti_dark_card">#111111</color>
+    <color name="input_bg">#1A1A1A</color>
+    <color name="input_border">#2A2A2A</color>
+    <color name="bottom_nav_bg">#0D0D0D</color>
 </resources>

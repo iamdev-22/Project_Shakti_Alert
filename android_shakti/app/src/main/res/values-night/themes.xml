@@ -1,22 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Dark Mode Theme -->
+    <!-- Night mode = same as our main black theme -->
     <style name="Theme.ShaktiAlertApp" parent="Theme.MaterialComponents.NoActionBar">
-        <!-- Primary color (Red for Shakti) -->
-        <item name="colorPrimary">#EF4444</item>
-        <item name="colorPrimaryVariant">#B91C1C</item>
+        <item name="colorPrimary">#FF2020</item>
+        <item name="colorPrimaryVariant">#CC0000</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-        
-        <!-- Secondary color -->
-        <item name="colorSecondary">#EF4444</item>
-        <item name="colorSecondaryVariant">#B91C1C</item>
+        <item name="colorSecondary">#FF2020</item>
+        <item name="colorSecondaryVariant">#CC0000</item>
         <item name="colorOnSecondary">#FFFFFF</item>
-        
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">#000000</item>
-        
-        <!-- Background colors -->
-        <item name="android:windowBackground">#121212</item>
-        <item name="colorSurface">#1E1E1E</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="colorSurface">#111111</item>
         <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+        <item name="colorControlActivated">#FF2020</item>
+        <item name="colorAccent">#FF2020</item>
     </style>
 </resources>

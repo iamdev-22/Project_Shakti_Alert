@@ -4,29 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/bg_dark_primary">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1E3C72"
-        app:tabTextColor="#A0FFFFFF"
-        app:tabSelectedTextColor="#FFFFFF"
-        app:tabIndicatorColor="#25D366"
-        app:tabMode="fixed">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scan QR Code" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Use Phone Number" />
-
-    </com.google.android.material.tabs.TabLayout>
+        android:background="@color/bg_dark_secondary"
+        app:tabTextColor="@color/text_secondary"
+        app:tabSelectedTextColor="@color/white"
+        app:tabIndicatorColor="@color/shakti_red"
+        app:tabMode="fixed"/>
 
     <!-- CONTENT CONTAINER -->
     <FrameLayout
@@ -45,13 +33,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:indeterminateTint="#25D366" />
+                android:indeterminateTint="@color/shakti_red" />
 
             <WebView
                 android:id="@+id/whatsappWebView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
-                
+
         </RelativeLayout>
 
         <!-- PHONE NUMBER VIEW -->
@@ -61,7 +49,7 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             android:padding="20dp"
-            android:background="#FFFFFF">
+            android:background="@color/bg_dark_primary">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -73,7 +61,7 @@
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:src="@android:drawable/stat_sys_phone_call"
-                    app:tint="#25D366"
+                    app:tint="@color/shakti_red"
                     android:layout_marginBottom="20dp"
                     android:layout_marginTop="40dp"/>
 
@@ -83,15 +71,15 @@
                     android:text="WhatsApp Connect"
                     android:textSize="24sp"
                     android:textStyle="bold"
-                    android:textColor="#1E3C72"
+                    android:textColor="@color/white"
                     android:layout_marginBottom="10dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Connect by entering your Guardian's phone number directly. We will send a connection request."
+                    android:text="Connect by entering your Guardian's phone number directly."
                     android:gravity="center"
-                    android:textColor="#666666"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginBottom="30dp"/>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -106,30 +94,31 @@
                         android:layout_height="wrap_content"
                         android:inputType="phone"
                         android:text="+91"
-                        android:drawableStart="@android:drawable/ic_menu_call"
-                        android:drawablePadding="10dp"/>
+                        android:textColor="@color/white"/>
                 </com.google.android.material.textfield.TextInputLayout>
-                
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Example: +919990758187"
                     android:textSize="12sp"
-                    android:textColor="#999999"
+                    android:textColor="@color/text_secondary"
                     android:layout_gravity="start"
                     android:layout_marginLeft="5dp"
                     android:layout_marginBottom="30dp"/>
 
+                <!-- Link Button - Red -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnConnectPhone"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
                     android:text="Link with Phone Number"
-                    android:backgroundTint="#25D366"
+                    android:backgroundTint="@color/shakti_red"
+                    android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:cornerRadius="10dp"/>
-                    
+
                 <TextView
                     android:id="@+id/tvStatus"
                     android:layout_width="match_parent"
@@ -138,7 +127,8 @@
                     android:gravity="center"
                     android:layout_marginTop="20dp"
                     android:textSize="14sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/text_secondary"/>
 
             </LinearLayout>
         </ScrollView>

@@ -67,6 +67,8 @@ dependencies {
     
     // Networking
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    // Volley for simple HTTP requests used in ContactsFragment
+    implementation("com.android.volley:volley:1.2.1")
     
     // Socket.IO and WebRTC for Live Streaming
     implementation("io.socket:socket.io-client:2.1.0")

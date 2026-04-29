@@ -4,14 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/bg_dark_primary">
 
-    <!-- Top Bar with Call Buttons -->
+    <!-- Top Bar - Dark with Red -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/life360_primary"
+        android:background="@color/bg_dark_secondary"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -24,7 +24,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_btn_speak_now"
             android:contentDescription="Voice Call"
-            app:tint="@color/white"
+            app:tint="@color/shakti_red"
             app:layout_constraintEnd_toStartOf="@id/btnVideoCall"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
@@ -38,7 +38,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/presence_video_online"
             android:contentDescription="Video Call"
-            app:tint="@color/white"
+            app:tint="@color/shakti_red"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
@@ -55,12 +55,12 @@
         app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintBottom_toTopOf="@id/inputContainer" />
 
-    <!-- Input Container -->
+    <!-- Input Container - Dark -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/inputContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/bg_dark_secondary"
         android:padding="8dp"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -73,7 +73,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_add"
             android:contentDescription="Attach"
-            app:tint="@color/life360_primary"
+            app:tint="@color/shakti_red"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
@@ -86,22 +86,24 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:hint="Type a message..."
-            android:background="@drawable/bg_pill_white"
+            android:background="@color/bg_dark_surface"
             android:padding="12dp"
             android:maxLines="4"
+            android:textColor="@color/white"
+            android:textColorHint="@color/text_hint"
             android:inputType="textMultiLine|textCapSentences"
             app:layout_constraintStart_toEndOf="@id/btnAttach"
             app:layout_constraintEnd_toStartOf="@id/btnSend"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Send Button -->
+        <!-- Send Button - Red -->
         <ImageButton
             android:id="@+id/btnSend"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@drawable/bg_circle_white"
-            android:backgroundTint="@color/life360_primary"
+            android:backgroundTint="@color/shakti_red"
             android:src="@android:drawable/ic_menu_send"
             android:contentDescription="Send"
             app:tint="@color/white"
